@@ -1,0 +1,361 @@
+# Query: tag(Range)?Util\\.[a-z][A-Za-z]+
+# Flags: RegExp
+# ContextLines: 1
+
+94 results - 22 files
+
+search = /tag(Range)?Util\.[a-z][A-Za-z]+/
+
+x - lib/assess/membrane/deserialization-membrane.js:
+  22      this.event = props.event;
+  23:     this.tagRanges = tagUtil.filterNonSupersetGroups(
+  24        USER_INPUT_FLAG,
+
+mip - lib/assess/propagators/array-prototype-join.js:
+   90
+   91:       targetData.resultTagRanges = tagRangeUtil.addAllWithOffset(
+   92          targetData.resultTagRanges,
+
+  102      if (i !== array.length - 1) {
+  103:       targetData.resultTagRanges = tagRangeUtil.addAllWithOffset(
+  104          targetData.resultTagRanges,
+
+mip - lib/assess/propagators/common.js:
+  50    if (argData.tracked) {
+  51:     metadata.tagRanges = tagRangeUtil.addAllWithOffset(
+  52        metadata.tagRanges,
+
+mip - lib/assess/propagators/manager.js:
+  170    if (tags) {
+  171:     sourceTagRanges = tagRangeUtil.addAll(
+  172        sourceTagRanges,
+
+  176
+  177:   sourceTagRanges = tagRangeUtil.remove(sourceTagRanges, untags);
+  178
+
+  209      if (sourceProps.tracked) {
+  210:       newTags = tagRangeUtil.addAll(newTags, sourceProps.tagRanges);
+  211      }
+
+  217        if (props.tracked) {
+  218:         newTags = tagRangeUtil.addAllWithOffset(
+  219            newTags,
+
+  267      // the goal here is to extract numbers for data.args based on the rule definition and then use
+  268:     // them to derive start/stop for tagRangeUtil.trim
+  269      const paramTypes = propagationUtil.sortParamTypes(
+
+  296      stop = adjustValue(stop, 'increment');
+  297:     sourceTagRanges = tagRangeUtil.trim(sourceTagRanges, stop, start);
+  298    } else {
+  299:     sourceTagRanges = tagRangeUtil.trim(sourceTagRanges, start, stop);
+  300    }
+
+mip - lib/assess/propagators/string-prototype-replace.js:
+  473      ...afterReplacement
+  474:   ].reduce((acc, tagRange) => tagRangeUtil.add(acc, tagRange), []);
+  475
+
+x - lib/assess/propagators/string-prototype-trim.js:
+  24    const { tagRanges: sourceTagRanges, event: sourceEvent } = sourceMetadata;
+  25:   const targetRanges = tagRangeUtil.trim(sourceTagRanges, left, right);
+  26
+
+x - lib/assess/propagators/templates.js:
+  138
+  139:   return tagRangeUtil.addAllWithOffset(tagRanges, newTagRanges, offset);
+  140  }
+
+mip - lib/assess/propagators/path/common.js:
+  210        resultMeta.parents.push(argData.event);
+  211:       resultMeta.tagRanges = tagRangeUtil.addAll(
+  212          resultMeta.tagRanges,
+
+x - lib/assess/propagators/querystring/parse.js:
+  27      // any tag ranges overlapping current part?
+  28:     const tagRanges = tagRangeUtil.trim(
+  29        trackingData.tagRanges,
+
+(mip, MIP) - lib/assess/propagators/querystring/stringify.js:
+  242            data.state.events.add(event);
+  243:           data.state.tagRanges = tagRangeUtil.addAllWithOffset(
+  244              data.state.tagRanges,
+
+  276    const tagRanges = _.sortBy(data.state.tagRanges, 'start').reduce(
+  277:     (acc, tagRange) => tagRangeUtil.add(acc, tagRange),
+  278      []
+
+mip - lib/assess/propagators/sequelize/sql-string-escape.js:
+  26
+  27:           trackingData.tagRanges = tagRangeUtil.add(
+  28              trackingData.tagRanges,
+
+mip - lib/assess/propagators/sequelize/sql-string-format-named-parameters.js:
+  101              if (isTracked(replacements[key])) {
+  102:               trackingData.tagRanges = tagRangeUtil.add(
+  103                  trackingData.tagRanges,
+
+mip - lib/assess/propagators/sequelize/sql-string-format.js:
+  53              if (isTracked) {
+  54:               trackingData.tagRanges = tagRangeUtil.add(
+  55                  trackingData.tagRanges,
+
+x - lib/assess/propagators/url/url-prototype-parse.js:
+  112    const stop = start + part.length - 1;
+  113:   const trimmed = tagRangeUtil.trim(tags, start, stop);
+  114    return trimmed;
+
+(x, x, mip, x) - lib/assess/propagators/url/url-url.js:
+   45    const hostData = tracker.getData(urlObj._contrast_host);
+   46:   const hostnameTags = tagRangeUtil.trim(hostData.tagRanges, 0, splitIndex - 1);
+   47:   const portTags = tagRangeUtil.trim(
+   48      hostData.tagRanges,
+
+  115      if (urlObj[`_contrast_${prop}`]) {
+  116:       tags = tagRangeUtil.addAll(
+  117          tags,
+
+  274        const valEnd = valStart + val.length;
+  275:       const trimmed = tagRangeUtil.trim(
+  276          sourceTagRanges,
+
+mip - lib/assess/propagators/util/format.js:
+  265    if (resultMeta.fmtStrTagRanges.length) {
+  266:     resultMeta.tagRanges = tagRangeUtil.addAll(
+  267        resultMeta.tagRanges,
+
+mip - lib/assess/propagators/validator/init-hooks.js:
+  73              if (trackingData.tracked) {
+  74:               trackingData.tagRanges = tagRangeUtil.add(
+  75                  trackingData.tagRanges,
+
+  77                );
+  78:               trackingData.tagRanges = tagRangeUtil.remove(
+  79                  trackingData.tagRanges,
+
+x - lib/assess/sinks/ssrf-url.js:
+  33
+  34:     return tagRangeUtil.add(tags, tagRange);
+  35    };
+
+mip - test/helpers/index.js:
+  153      for (const addlTag of [newTag].concat(tags.map(tagrange))) {
+  154:       objContrastProperties.tagRanges = tagRangeUtil.add(
+  155          objContrastProperties.tagRanges,
+
+test/lib/assess/models/tag-range/util.test.js:
+   71      it('list of 1', function() {
+   72:       expect(tagRangeUtil.contains(_pewpew0toLength, pewpew)).to.be.true;
+   73:       expect(tagRangeUtil.contains(_pewpew0toLength, zoink)).to.be.false;
+   74      });
+
+   76      it('list of 2 same', function() {
+   77:       expect(tagRangeUtil.contains(_pewpew0to5_pewpew6to10, pewpew)).to.be.true;
+   78:       expect(tagRangeUtil.contains(_pewpew0to5_pewpew6to10, zoink)).to.be.false;
+   79      });
+
+   81      it('list of 2 different', function() {
+   82:       expect(tagRangeUtil.contains(_pewpew0to5_zoink6to10, pewpew)).to.be.true;
+   83:       expect(tagRangeUtil.contains(_pewpew0to5_zoink6to10, zoink)).to.be.true;
+   84:       expect(tagRangeUtil.contains(_pewpew0to5_zoink6to10, 'something else')).to
+   85          .be.false;
+
+   90      it('overlapping', function() {
+   91:       const newList = tagRangeUtil.add(_pewpew0toLength, pewpew0toLength);
+   92        expect(newList).to.have.lengthOf(1);
+
+   95      it('non-overlapping', function() {
+   96:       const newList = tagRangeUtil.add(_pewpew0toLength, zoink0toLength);
+   97        expect(newList).to.have.lengthOf(2);
+
+  101        let newList = [];
+  102:       newList = tagRangeUtil.add(newList, pewpew0to1);
+  103:       newList = tagRangeUtil.add(newList, pewpew3to4);
+  104:       newList = tagRangeUtil.add(newList, pewpew6to7);
+  105        expect(newList).to.have.lengthOf(3);
+
+  110      it('1 tag each, no overlaps', function() {
+  111:       const merged = tagRangeUtil.addAll(_pewpew0toLength, _zoink0toLength);
+  112:       expect(tagRangeUtil.contains(merged, pewpew)).to.be.true;
+  113:       expect(tagRangeUtil.contains(merged, zoink)).to.be.true;
+  114        expect(merged).to.have.lengthOf(2);
+
+  117      it('1 tag and no tags', function() {
+  118:       const merged = tagRangeUtil.addAll(_pewpew0toLength, []);
+  119:       expect(tagRangeUtil.contains(merged, pewpew)).to.be.true;
+  120        expect(merged).to.have.lengthOf(1);
+
+  123      it('1 tag each, partial overlap', function() {
+  124:       const merged = tagRangeUtil.addAll(_pewpew0to5, _pewpew5to10);
+  125:       expect(tagRangeUtil.contains(merged, pewpew)).to.be.true;
+  126        expect(merged).to.have.lengthOf(1);
+
+  131      it('1 tag each, full overlap', function() {
+  132:       const merged = tagRangeUtil.addAll(_pewpew0toLength, _pewpew0toLength);
+  133:       expect(tagRangeUtil.contains(merged, pewpew)).to.be.true;
+  134        expect(merged).to.have.lengthOf(1);
+
+  137      it('2 tags each, overlap on 1', function() {
+  138:       const merged = tagRangeUtil.addAll(
+  139          _pewpew0to5_pewpew6to10,
+
+  141        );
+  142:       expect(tagRangeUtil.contains(merged, pewpew)).to.be.true;
+  143:       expect(tagRangeUtil.contains(merged, zoink)).to.be.true;
+  144        expect(merged).to.have.lengthOf(3);
+
+  147      it('should return 1st list if list2 is undefined', function() {
+  148:       expect(tagRangeUtil.addAll(_pewpew0to5_pewpew6to10)).to.deep.equal(
+  149          _pewpew0to5_pewpew6to10
+
+  154        expect(
+  155:         tagRangeUtil.addAll(undefined, _pewpew0to5_pewpew6to10)
+  156        ).to.deep.equal(_pewpew0to5_pewpew6to10);
+
+  161      it('remove tag in list', function() {
+  162:       const newList = tagRangeUtil.remove(_pewpew0toLength, [pewpew]);
+  163        expect(newList).to.have.lengthOf(0);
+
+  166      it('remove tag not in list', function() {
+  167:       const newList = tagRangeUtil.remove(_pewpew0toLength, [zoink]);
+  168        expect(newList).to.have.lengthOf(1);
+
+  171      it('remove 2 tags not in list', function() {
+  172:       const newList = tagRangeUtil.remove(_pewpew0toLength, ['dog', 'frog']);
+  173        expect(newList).to.have.lengthOf(1);
+
+  176      it('remove 2 tags in list', function() {
+  177:       const newList = tagRangeUtil.remove(_pewpew0to5_zoink6to10, [
+  178          zoink,
+
+  186      it('should log error if start < 0', function() {
+  187:       expect(tagRangeUtil.trim([], -1)).to.deep.equal([]);
+  188        expect(loggerMock.error).to.have.been.calledWith(
+
+  195      it('should log error if stop < start', function() {
+  196:       expect(tagRangeUtil.trim([], 10, 1)).to.deep.equal([]);
+  197        expect(loggerMock.error).to.have.been.calledWith(
+
+  204      it('should return empty if start === stop', function() {
+  205:       expect(tagRangeUtil.trim([], 1, 1)).to.deep.equal([]);
+  206        expect(loggerMock.error).to.not.have.been.called;
+
+  232      it('filter safely handles undefined lists', function() {
+  233:       const filtered = tagRangeUtil.filterNonSupersetGroups('dog', undefined);
+  234        expect(filtered).to.have.lengthOf(0);
+
+  238        expect(
+  239:         tagRangeUtil.filterNonSupersetGroups('untrusted', tagRanges)
+  240        ).to.deep.equal([
+
+  250        expect(
+  251:         tagRangeUtil.filterNonSupersetGroups('html-encode', tagRanges)
+  252        ).to.deep.equal([
+
+  275        ];
+  276:       pass = tagRangeUtil.allEncompass(tagRange, tagRanges);
+  277
+
+  281        tagRanges.push({ start: 0, stop: 10 });
+  282:       pass = tagRangeUtil.allEncompass(tagRange, tagRanges);
+  283
+
+  292        ];
+  293:       pass = tagRangeUtil.anyEncompass(tagRange, tagRanges);
+  294
+
+  298        tagRanges.push({ start: 9, stop: 210 });
+  299:       pass = tagRangeUtil.anyEncompass(tagRange, tagRanges);
+  300
+
+  310
+  311:       const tags = tagRangeUtil.append2(left, right);
+  312        expect(tags).to.have.lengthOf(1);
+
+  321
+  322:       const tags = tagRangeUtil.append2(left, right);
+  323        expect(tags).to.have.lengthOf(1);
+
+  331        const right = tagString('tracked right', new TagRange(0, 7, tag));
+  332:       const tags = tagRangeUtil.append2(left, right);
+  333        expect(tags).to.have.lengthOf(2);
+
+  347
+  348:       const resultTags = tagRangeUtil.merge(newTagRanges, oldTagRanges);
+  349
+
+  366
+  367:       const resultTags = tagRangeUtil.merge(newTagRanges, oldTagRanges);
+  368
+
+  385
+  386:       const resultTags = tagRangeUtil.merge(newTagRanges, oldTagRanges);
+  387
+
+  404
+  405:       let resultTags = tagRangeUtil.merge(newTagRanges, oldTagRanges);
+  406
+
+  427
+  428:       const tags = tagRangeUtil.inverse(left, tracker.getData(left).tagRanges);
+  429        expect(tags).to.have.lengthOf(1);
+
+  442
+  443:       const tags = tagRangeUtil.inverse(exp, tracker.getData(exp).tagRanges);
+  444        expect(tags).to.have.lengthOf(1);
+
+  458
+  459:       const tags = tagRangeUtil.inverse(exp, tracker.getData(exp).tagRanges);
+  460        expect(tags).to.have.lengthOf(2);
+
+  474
+  475:       const tags = tagRangeUtil.inverse(exp, tracker.getData(exp).tagRanges);
+  476        expect(tags).to.have.lengthOf(1);
+
+  482        const left = tracker.track('');
+  483:       expect(tagRangeUtil.inverse(left)).to.deep.equal([]);
+  484      });
+
+  497      it('should do nothing if tagNames are null', function() {
+  498:       expect(tagRangeUtil.remove(list)).to.deep.equal(list);
+  499      });
+
+  501      it('should do nothing if tagNames are empty array', function() {
+  502:       expect(tagRangeUtil.remove(list, [])).to.deep.equal(list);
+  503      });
+
+  505      it('should remove tags from list if exist', function() {
+  506:       expect(tagRangeUtil.remove(list, ['tag2', 'tag3'])).to.deep.equal([tag1]);
+  507      });
+
+  530        it(`will return ${expectedResult} when tag ranges ${desc}`, function() {
+  531:         const result = tagRangeUtil.tagRangesExcludeRuleId(ruleId, [
+  532            ...exclusionRange
+
+test/propagation/tags.test.js:
+  112          assert.strictEqual(tracker.getData(result).tagRanges.length, 1);
+  113:         assert(tagRangeUtil.contains(tracker.getData(result).tagRanges, tag));
+  114        };
+
+  129          assert.strictEqual(tracker.getData(result).tagRanges.length, 1);
+  130:         assert(tagRangeUtil.contains(tracker.getData(result).tagRanges, tag));
+  131        };
+
+  148          assert.strictEqual(tracker.getData(result).tagRanges.length, 1);
+  149:         assert(tagRangeUtil.contains(tracker.getData(result).tagRanges, tag1));
+  150        };
+
+  167          assert.strictEqual(tracker.getData(result).tagRanges.length, 2);
+  168:         assert(tagRangeUtil.contains(tracker.getData(result).tagRanges, tag1));
+  169:         assert(tagRangeUtil.contains(tracker.getData(result).tagRanges, tag2));
+  170        };
+
+test/propagation/templates.test.js:
+   48          assert.strictEqual(tagRanges[0].stop, s1.length);
+   49:         assert(tagRangeUtil.contains(props.tagRanges, tag1));
+   50
+
+  105
+  106:         assert(tagRangeUtil.contains(tracker.getData(result).tagRanges, tag1));
+  107          assert(tracker.getData(result).tracked);
