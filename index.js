@@ -27,12 +27,14 @@ const selectedTests = tests[version];
 const functionChain = [];
 const unknown = [];
 for (let i = 0; i < args.length; i++) {
-  if (args[i] in selectedTests) {
-    functionChain.push(selectedTests[args[i]]);
+  // syntax function-name:arg,arg,arg
+  const [fn, fnArgs] = args[i].split(':');
+  if (fn in selectedTests) {
+    functionChain.push(selectedTests[fn]);
   } else if (args[i] in tests.abbreviations) {
-    functionChain.push(selectedTests[tests.abbreviations[args[i]]]);
+    functionChain.push(selectedTests[tests.abbreviations[fn]]);
   } else {
-    unknown.push(args[i]);
+    unknown.push(fn);
   }
 }
 if (functionChain.length === 0) {
