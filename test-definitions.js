@@ -37,6 +37,9 @@ const v1 = {
     list = truV1.add(list, pewpew3to4);
     return truV1.add(list, pewpew6to7);
   },
+  removeOneTag(list = []) {
+    return truV1.remove(list, pewpew0to1.tag);
+  }
 };
 v1.default = v1.addSingleRange;
 
@@ -56,6 +59,9 @@ const v2 = {
     truV2.addInPlace(list, pewpew3to4);
     truV2.addInPlace(list, pewpew6to7);
   },
+  removeOneTag(list = []) {
+    truV2.remove(list, pewpew0to1.tag);
+  }
 };
 v2.default = v2.addSingleRange;
 
@@ -63,6 +69,7 @@ const abbreviations = {
   a1t: 'addOneTag',
   a2t: 'addTwoTags',
   a3t: 'addThreeTags',
+  r1t: 'removeOneTag',
 };
 
 module.exports = {v1, v2, abbreviations};
