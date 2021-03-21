@@ -31,6 +31,27 @@ const execute = tests.make(checks);
 
 console.log('executing', version, ...args);
 
+const gcFlags = {
+  [perf_hooks.constants.NODE_PERFORMANCE_GC_FLAGS_NO]: 'NO',
+  [perf_hooks.constants.NODE_PERFORMANCE_GC_FLAGS_CONSTRUCT_RETAINED]: 'CONSTRUCT_RETAINED',
+  [perf_hooks.constants.NODE_PERFORMANCE_GC_FLAGS_FORCED]: 'FORCED',
+  [perf_hooks.constants.NODE_PERFORMANCE_GC_FLAGS_SYNCHRONOUS_PHANTOM_PROCESSING]: 'SYNCHRONOUS_PHANTOM_PROCESSING',
+  [perf_hooks.constants.NODE_PERFORMANCE_GC_FLAGS_ALL_AVAILABLE_GARBAGE]: 'ALL_AVAILABLE_GARBAGE',
+  [perf_hooks.constants.NODE_PERFORMANCE_GC_FLAGS_ALL_EXTERNAL_MEMORY]: 'ALL_EXTERNAL_MEMORY',
+  [perf_hooks.constants.NODE_PERFORMANCE_GC_FLAGS_SCHEDULE_IDLE]: 'SCHEDULE_IDLE',
+};
+
+const gcFlagCounts = {
+  NO: 0,
+  CONSTRUCT_RETAINED: 0,
+  FORCED: 0,
+  SYNCHRONOUS_PHANTOM_PROCESSING: 0,
+  ALL_AVAILABLE_GARBAGE: 0,
+  ALL_EXTERNAL_MEMORY: 0,
+  SCHEDULE_IDLE: 0,
+  undefined: 0,
+};
+
 const gcTypes = {
   [perf_hooks.constants.NODE_PERFORMANCE_GC_MINOR]: 'minor',      // 1
   [perf_hooks.constants.NODE_PERFORMANCE_GC_MAJOR]: 'major',      // 2
@@ -64,6 +85,7 @@ const obs = new PerfObserver((list) => {
       verbose && console.log(`perf gc: ${entry.duration} (${kind}) flags: ${entry.flags}`);
       gcCounts += 1;
       gcTypeCounts[entry.kind] += 1;
+      gcFlagCounts[gcFlags[entry.flags]] += 1;
       totalGCTime += entry.duration;
     }
   }
@@ -115,6 +137,7 @@ test().then(() => {
   console.log(`standard deviation of ${nGroups} groups: ${stddev(iTimes).toFixed(3)}`)
   console.log(`total: gc count: ${gcCounts}, gc time: ${totalGCTime.toFixed(3)}`);
   console.log(gcTypeCounts);
+  //console.log(gcFlagCounts);
 
   console.log('done');
 });
