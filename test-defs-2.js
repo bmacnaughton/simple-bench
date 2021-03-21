@@ -93,10 +93,17 @@ const testFunctions = {
     },
     v2(list) {
       return V2.addAllInPlace(list, [zoink3to5, zoink7to9, zoink11to14]);
-    }
-
+    },
+  },
+  filterNonSupersetGroups: {
+    nonList: true,
+    v1(list) {
+      return V1.filterNonSupersetGroups('pew-pew', [zoink3to5, zoink7to9, zoink11to14]);
+    },
+    v2(list) {
+      return V2.filterNonSupersetGroups('pew-pew', [zoink3to5, zoink7to9, zoink11to14]);
+    },
   }
-
 }
 
 const abbreviations = {
