@@ -12,26 +12,6 @@ const util = require('util');
 
 const tests = require('./test-definitions');
 
-//// this has the extension 'js-x' so the tests won't try to run it
-//const TagRange = require('../agent/lib/assess/models/tag-range');
-//// load tag range utilities v1 (existing) and v2 (proposed).
-//const truV1 = require('../agent/lib/assess/models/tag-range/util-x.js');
-//const truV2 = require('../agent/lib/assess/models/tag-range/util.js');
-//
-//const str = 'space laser gun';
-//const pewpew = 'pew pew';
-//const zoink = 'zoink';
-//
-//const pewpew0toLength = new TagRange(0, str.length, pewpew);
-//const pewpew0to1 = new TagRange(0, 1, pewpew);
-//const pewpew3to4 = new TagRange(3, 4, pewpew);
-//const pewpew6to7 = new TagRange(6, 7, pewpew);
-//const pewpew0to5 = new TagRange(0, 5, pewpew);
-//const pewpew5to10 = new TagRange(5, 10, pewpew);
-//const pewpew6to10 = new TagRange(6, 10, pewpew);
-//const zoink0toLength = new TagRange(0, str.length - 1, zoink);
-//const zoink6to10 = new TagRange(6, 10, zoink);
-
 const warmup = 100;
 
 const interationsPerGroup = 100000;
@@ -45,11 +25,10 @@ let totalGCTime = 0;
 let functionChain;
 
 // take from env?
-// add .remove() vs .removeInPlace() test
-// add .filterMatching() comparison - the impact of lodash, nothing more
-// ditto .filterNonSupersetGroups() and .tagRangesEncompass()
 const arg = process.argv[2];
 if (arg in tests) {
+  // in theory a test can be a sequence of tests. that requires looping
+  // on process.argv and adding tests to functionChain.
   functionChain = [tests[arg]];
 } else {
   console.log('util.bench: invalid execute parameter:', arg);
@@ -87,12 +66,17 @@ const obs = new PerfObserver((list) => {
 });
 obs.observe({entryTypes: ['measure', 'gc'], buffered: true});
 
+//
+// function to run the tests
+//
 async function test() {
+  // warmup
   for (let i = warmup; i > 0; i--) {
     execute(functionChain);
   }
   await pause(groupWaitMS);
 
+  // execute x groups of y iterations with a pause after each group
   for (let i = groupCount; i > 0; i--) {
     perf.mark('start-iteration');
     for (let i = interationsPerGroup; i > 0; i--) {
@@ -102,6 +86,7 @@ async function test() {
     await pause(groupWaitMS);
   }
 
+  // final pause
   await pause(groupWaitMS);
 }
 
@@ -109,6 +94,9 @@ async function pause(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+//
+// execute the tests then report
+//
 test().then(() => {
   obs.disconnect();
   // throw out the first one
