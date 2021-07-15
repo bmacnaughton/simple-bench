@@ -1,51 +1,81 @@
 'use strict';
 
-//
-// this file exports self-contained tests
-//
-const {isISIN, isISIN2, x} = require('./isISIN2');
 
-const valid = [
-  'AU0000XVGZA3',
-  'DE000BAY0017',
-  'BE0003796134',
-  'SG1G55870362',
-  'GB0001411924',
-  'DE000WCH8881',
-  'PLLWBGD00016',
-  'US0378331005',
-];
-const invalid = [
-  'DE000BAY0018',
-  'PLLWBGD00019',
-  'foo',
-  '5398228707871528',
-];
+const _ = require('lodash');
+const {Generator} = require('@bmacnaughton/string-generator');
+const gen = new Generator().generate;
 
-const perf_hooks = require('perf_hooks');
-const {perf, PerformanceObserver: PerfObserver} = perf_hooks;
-
-function execute (fn) {
-  for (let i = 0; i < valid.length; i++) {
-    if (!fn(valid[i])) {
-      throw new Error(valid[i], 'returned invalid');
+const data = [];
+let i = 0;
+const obj = {
+  agent: {
+    node: {
+      api: {
+        bruce: {
+          wenxin: {
+            grace: 'data'
+          }
+        }
+      }
     }
   }
-  for (let i = 0; i < invalid.length; i++) {
-    if (fn(invalid[i])) {
-      throw new Error(valid[i], 'returned valid');
+};
+
+function inline() {
+  return typeof data[i++] === 'string' || data[i] instanceof String;
+}
+function t_instanceof() {
+  return data[i++] instanceof String;
+}
+
+function t_typeof() {
+  return typeof data[i++] === 'string';
+}
+
+function lodash() {
+  return _.isString(data[i++]);
+}
+
+function _get() {
+  return _.get(obj, 'agent.node.api.bruce.wenxin');
+}
+
+function get() {
+  return obj.agent && obj.agent.node && obj.agent.node.api &&
+    obj.agent.node.api.bruce && obj.agent.node.api.bruce.wenxin;
+  //return obj.agent.node.api.bruce.wenxin;
+}
+
+function _getF() {
+  return _.get(obj, 'agent.node.fail.bruce.wenxin');
+}
+
+function getF() {
+  return obj.agent && obj.agent.node && obj.agent.node.fail &&
+    obj.agent.node.fail.bruce && obj.agent.node.fail.bruce.wenxin;
+}
+
+module.exports = {
+  tests: {
+    inline,
+    lodash,
+    t_instanceof,
+    t_typeof,
+    get,
+    _get,
+    getF,
+    _getF
+  },
+  setup ({warmup, groupCount, iterationsPerGroup}) {
+    for (let i = 0; i < iterationsPerGroup; i++) {
+      if (i & 0) {
+        data[i] = new String(gen('${[a-z]<2,4>}'));
+      } else {
+        data[i] = gen('${[a-z]<2,4>}');
+      }
     }
+  },
+  groupSetup(iterations) {
+    i = 0;
   }
-}
-
-function v1() {
-  execute(x);
-}
-function v2() {
-  execute(isISIN);
-}
-function v3() {
-  execute(isISIN2);
-}
-
-module.exports = {v1, v2, v3};
+};

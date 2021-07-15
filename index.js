@@ -10,11 +10,11 @@ const perf_hooks = require('perf_hooks');
 const { performance: perf, PerformanceObserver: PerfObserver } = perf_hooks;
 const util = require('util');
 
-const tests = require('./test-definitions');
+const {setup, groupSetup, tests} = require('./test-definitions');
 
 const warmup = 100;
 
-const interationsPerGroup = 100000;
+const iterationsPerGroup = 1000000;
 const groupCount = 10;
 const groupWaitMS = 1000;
 
@@ -70,6 +70,13 @@ obs.observe({entryTypes: ['measure', 'gc'], buffered: true});
 // function to run the tests
 //
 async function test() {
+  // call the tester's setup
+  if (setup) {
+    setup({warmup, groupCount, iterationsPerGroup});
+  }
+  if (groupSetup) {
+    groupSetup(warmup);
+  }
   // warmup
   for (let i = warmup; i > 0; i--) {
     execute(functionChain);
@@ -78,8 +85,12 @@ async function test() {
 
   // execute x groups of y iterations with a pause after each group
   for (let i = groupCount; i > 0; i--) {
+    // setup for the group
+    if (groupSetup) {
+      groupSetup(iterationsPerGroup);
+    }
     perf.mark('start-iteration');
-    for (let i = interationsPerGroup; i > 0; i--) {
+    for (let i = iterationsPerGroup; i > 0; i--) {
       execute(functionChain);
     }
     perf.measure('iteration-time', 'start-iteration');
@@ -87,7 +98,8 @@ async function test() {
   }
 
   // final pause
-  await pause(groupWaitMS);
+  await pause(groupWaitMS * 10);
+  return pause(groupWaitMS);
 }
 
 async function pause(ms) {
@@ -104,7 +116,7 @@ test().then(() => {
   const nIntervals = iTimes.length;
   const total = iTimes.reduce((tot, v) => tot + v, 0);
   console.log(`group times: [${iTimes.map((t) => t.toFixed(2)).join(', ')}]`);
-  console.log(`average per ${interationsPerGroup}: ${(total/nIntervals).toFixed(3)}`);
+  console.log(`average per ${iterationsPerGroup}: ${(total/nIntervals).toFixed(3)}`);
   console.log(`stddev of ${nIntervals} groups: ${stddev(iTimes).toFixed(3)}`)
   console.log(`total: gc count: ${gcCounts}, gc time: ${totalGCTime.toFixed(3)}`);
 
