@@ -5,77 +5,94 @@ const _ = require('lodash');
 const {Generator} = require('@bmacnaughton/string-generator');
 const gen = new Generator().generate;
 
-const data = [];
-let i = 0;
-const obj = {
-  agent: {
-    node: {
-      api: {
-        bruce: {
-          wenxin: {
-            grace: 'data'
-          }
-        }
-      }
-    }
-  }
-};
+const ascii_yes = 'bruce-xyzzy-no';
+const ascii_no = 'bruce-wendy-no';
+const unicode_yes = 'bruce-\u0000\u0000\u0000\u0000\u0000-no';
+const unicode_no = 'bruce-wendy-no';
 
-function inline() {
-  return typeof data[i++] === 'string' || data[i] instanceof String;
-}
-function t_instanceof() {
-  return data[i++] instanceof String;
+let reAscii;
+let reUnicode;
+reAscii = new RegExp('xyzzy', 'g');
+reUnicode = new RegExp('\\\\u0000\\\\u0000\\\\u0000\\\\u0000\\\\u0000', 'g');
+
+function ascii_yesStringify() {
+  return JSON.stringify(ascii_yes.repeat(5));
 }
 
-function t_typeof() {
-  return typeof data[i++] === 'string';
+function unicode_yesStringify() {
+  return JSON.stringify(unicode_yes.repeat(5));
 }
 
-function lodash() {
-  return _.isString(data[i++]);
+function ascii_noStringify() {
+  return JSON.stringify(ascii_no.repeat(5));
 }
 
-function _get() {
-  return _.get(obj, 'agent.node.api.bruce.wenxin');
+function unicode_noStringify() {
+  return JSON.stringify(unicode_no.repeat(5));
 }
 
-function get() {
-  return obj.agent && obj.agent.node && obj.agent.node.api &&
-    obj.agent.node.api.bruce && obj.agent.node.api.bruce.wenxin;
-  //return obj.agent.node.api.bruce.wenxin;
+// one of the above must be run before the following two
+
+function asciiReplace(s) {
+  return s.replace(reAscii, (m, offset) => {
+    return '';
+  });
+}
+function unicodeReplace(s) {
+  return s.replace(reUnicode, (m, offset) => {
+    return '';
+  });
 }
 
-function _getF() {
-  return _.get(obj, 'agent.node.fail.bruce.wenxin');
+// the following can be run in a chain or standalone
+function asciiFound(s) {
+  s = s || JSON.stringify(ascii_yes);
+  return s.replace(reAscii, (m, offset) => {
+    return '';
+  });
 }
 
-function getF() {
-  return obj.agent && obj.agent.node && obj.agent.node.fail &&
-    obj.agent.node.fail.bruce && obj.agent.node.fail.bruce.wenxin;
+function asciiNotFound(s) {
+  s = s || JSON.stringify(ascii_no);
+  return s.replace(reAscii, (m, offset) => {
+    return '';
+  });
 }
+
+function unicodeFound(s) {
+  s = s || JSON.stringify(unicode_yes);
+  return s.replace(reUnicode, (m, offset) => {
+    return '';
+  });
+}
+
+function unicodeNotFound(s) {
+  s = s || JSON.stringify(unicode_no);
+  return s.replace(reUnicode, (m, offset) => {
+    return '';
+  });
+}
+
 
 module.exports = {
   tests: {
-    inline,
-    lodash,
-    t_instanceof,
-    t_typeof,
-    get,
-    _get,
-    getF,
-    _getF
+    ascii_yesStringify,
+    unicode_yesStringify,
+    ascii_noStringify,
+    unicode_noStringify,
+    asciiFound,
+    unicodeFound,
+    asciiNotFound,
+    unicodeNotFound
   },
   setup ({warmup, groupCount, iterationsPerGroup}) {
-    for (let i = 0; i < iterationsPerGroup; i++) {
-      if (i & 0) {
-        data[i] = new String(gen('${[a-z]<2,4>}'));
-      } else {
-        data[i] = gen('${[a-z]<2,4>}');
-      }
-    }
   },
-  groupSetup(iterations) {
-    i = 0;
-  }
+
 };
+
+if (!module.parent) {
+  asciiFound();
+  asciiNotFound();
+  unicodeFound();
+  unicodeNotFound();
+}

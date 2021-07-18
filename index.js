@@ -14,7 +14,7 @@ const {setup, groupSetup, tests} = require('./test-definitions');
 
 const warmup = 100;
 
-const iterationsPerGroup = 1000000;
+const iterationsPerGroup = 100000;
 const groupCount = 10;
 const groupWaitMS = 1000;
 
