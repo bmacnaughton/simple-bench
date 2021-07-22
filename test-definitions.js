@@ -4,6 +4,7 @@
 const _ = require('lodash');
 const {Generator} = require('@bmacnaughton/string-generator');
 const gen = new Generator().generate;
+const TagRange = require('@contrast/agent/lib/assess/models/tag-range');
 
 const ascii_yes = 'bruce-xyzzy-no';
 const ascii_no = 'bruce-wendy-no';
@@ -14,6 +15,9 @@ let reAscii;
 let reUnicode;
 reAscii = new RegExp('xyzzy', 'g');
 reUnicode = new RegExp('\\\\u0000\\\\u0000\\\\u0000\\\\u0000\\\\u0000', 'g');
+
+let tagRange;
+let trList = [];
 
 function ascii_yesStringify() {
   return JSON.stringify(ascii_yes.repeat(5));
@@ -74,18 +78,38 @@ function unicodeNotFound(s) {
 }
 
 
+
+
+
+
+
 module.exports = {
   tests: {
-    ascii_yesStringify,
-    unicode_yesStringify,
-    ascii_noStringify,
-    unicode_noStringify,
-    asciiFound,
-    unicodeFound,
-    asciiNotFound,
-    unicodeNotFound
+    trClone() {
+      return tagRange.clone();
+    },
+    _Clone() {
+      return _.cloneDeep(tagRange);
+    },
+    trLoopList() {
+      let clone = [];
+      for (let i = 0; i < trList.length; i++) {
+        clone.push(tagRange.clone());
+      }
+      return clone;
+    },
+    trFuncList() {
+      return trList.map((r) => r.clone());
+    },
+    _List() {
+      return _.cloneDeep(trList);
+    }
   },
   setup ({warmup, groupCount, iterationsPerGroup}) {
+    tagRange = new TagRange(1, 100, 'bruce');
+    for (let i = 0; i < 2; i++) {
+      trList.push(tagRange);
+    }
   },
 
 };
