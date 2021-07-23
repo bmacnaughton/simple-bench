@@ -18,6 +18,7 @@ reUnicode = new RegExp('\\\\u0000\\\\u0000\\\\u0000\\\\u0000\\\\u0000', 'g');
 
 let tagRange;
 let trList = [];
+let longTrList = [];
 
 function ascii_yesStringify() {
   return JSON.stringify(ascii_yes.repeat(5));
@@ -98,17 +99,23 @@ module.exports = {
       }
       return clone;
     },
-    trFuncList() {
-      return trList.map((r) => r.clone());
+    trFuncList(list = trList) {
+      return list.map((r) => r.clone());
     },
-    _List() {
-      return _.cloneDeep(trList);
+    _List(list = trList) {
+      return _.cloneDeep(list);
+    },
+    longList() {
+      return  longTrList;
     }
   },
   setup ({warmup, groupCount, iterationsPerGroup}) {
     tagRange = new TagRange(1, 100, 'bruce');
     for (let i = 0; i < 2; i++) {
       trList.push(tagRange);
+    }
+    for (let i = 0; i < 50; i++) {
+      longTrList.push(tagRange);
     }
   },
 

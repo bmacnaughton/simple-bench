@@ -22,19 +22,21 @@ const groupTimes = [];
 let gcCounts = 0;
 let totalGCTime = 0;
 
-let functionChain;
-
 // take from env?
-const arg = process.argv[2];
-if (arg in tests) {
-  // in theory a test can be a sequence of tests. that requires looping
-  // on process.argv and adding tests to functionChain.
-  functionChain = [tests[arg]];
-} else {
-  console.log('util.bench: invalid execute parameter:', arg);
-  // eslint-disable-next-line
-  process.exit(1);
+const args = process.argv.slice(2);
+const functionChain = [];
+for (const arg of args) {
+  if (arg in tests) {
+    // in theory a test can be a sequence of tests. that requires looping
+    // on process.argv and adding tests to functionChain.
+    functionChain.push(tests[arg]);
+  } else {
+    console.log('util.bench: invalid execute parameter:', arg);
+    // eslint-disable-next-line
+    process.exit(1);
+  }
 }
+
 
 const gcTypes = {
   [perf_hooks.constants.NODE_PERFORMANCE_GC_MAJOR]: 'major',      // 2
