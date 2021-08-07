@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "baseline"
+node index.js noop noop
+
 echo "giantFileAsText lastIxString"
 node index.js giantFileAsText lastIxString
 
