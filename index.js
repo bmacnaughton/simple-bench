@@ -1,5 +1,7 @@
 'use strict';
-/* eslint-disable prettier/prettier */
+
+const {summarize} = require('./lib/summarize');
+
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
@@ -7,16 +9,31 @@
 // test-definitions.
 
 const perf_hooks = require('perf_hooks');
-const { performance: perf, PerformanceObserver: PerfObserver } = perf_hooks;
+const {performance: perf, PerformanceObserver: PerfObserver} = perf_hooks;
 const util = require('util');
 
-const {setup, groupSetup, tests} = require('./test-definitions');
+const {configure, setup, groupSetup, tests} = require('./test-definitions');
 
-const warmup = 100;
+const defaultConfig = {
+  warmupIterations: 100,
+  groupIterations: 100000,
+  groupCount: 10,
+  groupWaitMS: 1000,
+  stddevRange: 2,
+};
 
-const iterationsPerGroup = 100000;
-const groupCount = 10;
-const groupWaitMS = 1000;
+const userConfig = configure ? configure() : {};
+const config = Object.assign({}, defaultConfig, userConfig);
+const {
+  warmupIterations,
+  groupIterations,
+  groupCount,
+  groupWaitMS,
+  stddevRange,
+} = config;
+
+console.log(`executing ${groupCount} groups of ${groupIterations} iterations (${groupWaitMS}ms intergroup pause)`);
+console.log(`excluding group times outside ${stddevRange} * stddev`);
 
 const groupTimes = [];
 let gcCounts = 0;
@@ -30,6 +47,9 @@ for (const arg of args) {
     // in theory a test can be a sequence of tests. that requires looping
     // on process.argv and adding tests to functionChain.
     functionChain.push(tests[arg]);
+  } else if (arg === 'noop') {
+    // predefined noop function. can help determine baselines
+    functionChain.push(s => s);
   } else {
     console.log('util.bench: invalid execute parameter:', arg);
     // eslint-disable-next-line
@@ -48,7 +68,6 @@ const gcTypes = {
 //
 // setup measurements
 //
-
 const verbose = process.env.VERBOSE;
 
 const obs = new PerfObserver((list) => {
@@ -74,13 +93,13 @@ obs.observe({entryTypes: ['measure', 'gc'], buffered: true});
 async function test() {
   // call the tester's setup
   if (setup) {
-    setup({warmup, groupCount, iterationsPerGroup});
+    setup(config);
   }
   if (groupSetup) {
-    groupSetup(warmup);
+    groupSetup(config);
   }
   // warmup
-  for (let i = warmup; i > 0; i--) {
+  for (let i = warmupIterations; i > 0; i--) {
     execute(functionChain);
   }
   await pause(groupWaitMS);
@@ -89,10 +108,10 @@ async function test() {
   for (let i = groupCount; i > 0; i--) {
     // setup for the group
     if (groupSetup) {
-      groupSetup(iterationsPerGroup);
+      groupSetup(config);
     }
     perf.mark('start-iteration');
-    for (let i = iterationsPerGroup; i > 0; i--) {
+    for (let i = groupIterations; i > 0; i--) {
       execute(functionChain);
     }
     perf.measure('iteration-time', 'start-iteration');
@@ -104,26 +123,6 @@ async function test() {
   return pause(groupWaitMS);
 }
 
-async function pause(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-//
-// execute the tests then report
-//
-test().then(() => {
-  obs.disconnect();
-  // throw out the first one
-  const iTimes = groupTimes.slice(1);
-  const nIntervals = iTimes.length;
-  const total = iTimes.reduce((tot, v) => tot + v, 0);
-  console.log(`group times: [${iTimes.map((t) => t.toFixed(2)).join(', ')}]`);
-  console.log(`average per ${iterationsPerGroup}: ${(total/nIntervals).toFixed(3)}`);
-  console.log(`stddev of ${nIntervals} groups: ${stddev(iTimes).toFixed(3)}`)
-  console.log(`total: gc count: ${gcCounts}, gc time: ${totalGCTime.toFixed(3)}`);
-
-  console.log('done');
-});
 
 //
 // execute functionChains
@@ -135,19 +134,16 @@ function execute(fc) {
   }
 }
 
+async function pause(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 //
-// summarization functions
+// execute the tests then report
 //
-function mean(array) {
-  return array.reduce((tot, v) => tot + v, 0) / array.length;
-}
+test().then(() => {
+  obs.disconnect();
+  const gcStats = {gcCounts, totalGCTime};
+  summarize({gTimes: groupTimes.slice(), gcStats, stddevRange});
+});
 
-function variance(array) {
-  const average = mean(array);
-  return mean(array.map((num) => (num - average) ** 2));
-}
-
-function stddev(array) {
-  return variance(array) ** 0.5;
-}

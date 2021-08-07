@@ -9,8 +9,8 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@bmacnaughton/string-generator": "^2.0.0",
-    "lodash": "^4.17.21"
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^7.32.0"
   }
 }

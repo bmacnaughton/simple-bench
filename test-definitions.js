@@ -1,129 +1,120 @@
 'use strict';
 
+const fs = require('fs');
 
-const _ = require('lodash');
-const {Generator} = require('@bmacnaughton/string-generator');
-const gen = new Generator().generate;
-const TagRange = require('@contrast/agent/lib/assess/models/tag-range');
+/* eslint-disable no-unused-vars */
 
-const ascii_yes = 'bruce-xyzzy-no';
-const ascii_no = 'bruce-wendy-no';
-const unicode_yes = 'bruce-\u0000\u0000\u0000\u0000\u0000-no';
-const unicode_no = 'bruce-wendy-no';
+/*
+  - file.split('\n')
+  - while (m = /([^\n]*?)\n/g.exec(file)) {...}
+  - lastIx = 0; while ((ix = file.indexOf('\n', last + 1)) >= 0) {substr...; lastIx = ix}
+  - previous but use buffer
+ */
 
-let reAscii;
-let reUnicode;
-reAscii = new RegExp('xyzzy', 'g');
-reUnicode = new RegExp('\\\\u0000\\\\u0000\\\\u0000\\\\u0000\\\\u0000', 'g');
+const giantfile = 'data/giantfile.log';
+const bigfile = 'data/bigfile.log';
+const tinyfile = 'data/tinyfile.log';
 
-let tagRange;
-let trList = [];
-let longTrList = [];
+const _giantfile = fs.readFileSync(giantfile, 'utf8');
+const _bigfile = fs.readFileSync(bigfile, 'utf8');
+const _tinyfile = fs.readFileSync(tinyfile, 'utf8');
 
-function ascii_yesStringify() {
-  return JSON.stringify(ascii_yes.repeat(5));
+const b_giantfile = fs.readFileSync(giantfile);
+const b_bigfile = fs.readFileSync(bigfile);
+const b_tinyfile = fs.readFileSync(tinyfile);
+
+// create files of n lines
+
+function giantFileAsText() {
+  return _giantfile;
 }
 
-function unicode_yesStringify() {
-  return JSON.stringify(unicode_yes.repeat(5));
+function bigFileAsText() {
+  return _bigfile;
 }
 
-function ascii_noStringify() {
-  return JSON.stringify(ascii_no.repeat(5));
+function tinyFileAsText() {
+  return _tinyfile;
 }
 
-function unicode_noStringify() {
-  return JSON.stringify(unicode_no.repeat(5));
+function giantFileAsBuffer() {
+  return b_giantfile;
 }
 
-// one of the above must be run before the following two
-
-function asciiReplace(s) {
-  return s.replace(reAscii, (m, offset) => {
-    return '';
-  });
-}
-function unicodeReplace(s) {
-  return s.replace(reUnicode, (m, offset) => {
-    return '';
-  });
+function bigFileAsBuffer() {
+  return b_bigfile;
 }
 
-// the following can be run in a chain or standalone
-function asciiFound(s) {
-  s = s || JSON.stringify(ascii_yes);
-  return s.replace(reAscii, (m, offset) => {
-    return '';
-  });
+function tinyFileAsBuffer() {
+  return b_tinyfile();
 }
 
-function asciiNotFound(s) {
-  s = s || JSON.stringify(ascii_no);
-  return s.replace(reAscii, (m, offset) => {
-    return '';
-  });
+function split(f) {
+  const lines = f.split('\n');
 }
 
-function unicodeFound(s) {
-  s = s || JSON.stringify(unicode_yes);
-  return s.replace(reUnicode, (m, offset) => {
-    return '';
-  });
+function regex(f) {
+  const re = /([^\n]*?)\n/g;
+  let m;
+  while ((m = re.exec(f))) {
+    const line = m[1];
+  }
 }
 
-function unicodeNotFound(s) {
-  s = s || JSON.stringify(unicode_no);
-  return s.replace(reUnicode, (m, offset) => {
-    return '';
-  });
+function lastIxString(f) {
+  let ix;
+  let lastIx = 0;
+  while ((ix = f.indexOf('\n', lastIx)) >= 0) {
+    const line = f.substring(lastIx, ix);
+    lastIx = ix + 1;
+  }
 }
 
-
-
-
-
+function lastIxBuffer(b) {
+  let ix;
+  let lastIx = 0;
+  while ((ix = b.indexOf(10, lastIx)) >= 0) {
+    const line = b.toString('utf8', lastIx, ix);
+    lastIx = ix + 1;
+  }
+}
 
 
 module.exports = {
-  tests: {
-    trClone() {
-      return tagRange.clone();
-    },
-    _Clone() {
-      return _.cloneDeep(tagRange);
-    },
-    trLoopList() {
-      let clone = [];
-      for (let i = 0; i < trList.length; i++) {
-        clone.push(tagRange.clone());
-      }
-      return clone;
-    },
-    trFuncList(list = trList) {
-      return list.map((r) => r.clone());
-    },
-    _List(list = trList) {
-      return _.cloneDeep(list);
-    },
-    longList() {
-      return  longTrList;
-    }
+  configure() {
+    return {
+      groupIterations: 100,
+      groupWaitMS: 1000,
+    };
   },
-  setup ({warmup, groupCount, iterationsPerGroup}) {
-    tagRange = new TagRange(1, 100, 'bruce');
-    for (let i = 0; i < 2; i++) {
-      trList.push(tagRange);
-    }
-    for (let i = 0; i < 50; i++) {
-      longTrList.push(tagRange);
-    }
+  tests: {
+    // data sources
+    giantFileAsText,
+    giantFileAsBuffer,
+    bigFileAsText,
+    bigFileAsBuffer,
+    tinyFileAsText,
+    tinyFileAsBuffer,
+    // line splitters
+    split,
+    regex,
+    lastIxString,
+    lastIxBuffer,
+  },
+  setup(config) {
+
   },
 
 };
 
 if (!module.parent) {
-  asciiFound();
-  asciiNotFound();
-  unicodeFound();
-  unicodeNotFound();
+  /* eslint-disable no-console */
+  const f = fs.readFileSync('route-metrics.json', 'utf8');
+  const b = fs.readFileSync('route-metrics.json');
+  console.log('string');
+  lastIxString(f);
+  console.log('buffer');
+  lastIxBuffer(b);
+  console.log('regex');
+  regex(f);
 }

@@ -23,9 +23,10 @@ const invalid = [
 ];
 
 const perf_hooks = require('perf_hooks');
+/* eslint-disable no-unused-vars */
 const {perf, PerformanceObserver: PerfObserver} = perf_hooks;
 
-function execute (fn) {
+function execute(fn) {
   for (let i = 0; i < valid.length; i++) {
     if (!fn(valid[i])) {
       throw new Error(valid[i], 'returned invalid');

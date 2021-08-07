@@ -66,7 +66,7 @@ module.exports = {
     getF,
     _getF
   },
-  setup ({warmup, groupCount, iterationsPerGroup}) {
+  setup({warmup, groupCount, iterationsPerGroup}) {
     for (let i = 0; i < iterationsPerGroup; i++) {
       if (i & 0) {
         data[i] = new String(gen('${[a-z]<2,4>}'));
