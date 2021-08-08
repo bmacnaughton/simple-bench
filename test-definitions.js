@@ -11,6 +11,7 @@ const fs = require('fs');
   - previous but use buffer
  */
 
+const ginormousfile = 'data/ginormous.log';
 const giantfile = 'data/giantfile.log';
 const bigfile = 'data/bigfile.log';
 const tinyfile = 'data/tinyfile.log';
@@ -25,14 +26,22 @@ const b_tinyfile = fs.readFileSync(tinyfile);
 
 
 // filename
+function ginormous() {
+  return {file: ginormousfile, lines: 1000000};
+}
 function giantFilename() {
-  return {file: giantfile, lines: 3872};
+  return {file: giantfile, lines: 154880};
 }
 function bigFilename() {
-  return {file: bigfile, lines: 88};
+  return {file: bigfile, lines: 3872};
 }
 function tinyFilename() {
   return {file: tinyfile, lines: 4};
+}
+
+// augment the filename
+function addParse(config) {
+  config.parse = true;
 }
 
 // text
@@ -87,7 +96,7 @@ function lastIxBuffer(b) {
   }
 }
 
-async function streamProcessFile({file, lines}) {
+async function streamProcessFile({file, lines, parse}) {
   const s = fs.createReadStream(file, {encoding: 'utf8'});
 
   let done = {};
@@ -105,6 +114,10 @@ async function streamProcessFile({file, lines}) {
     }
   });
 
+  s.on('error', function(e) {
+    done.reject(e);
+  })
+
   let leftover = '';
   s.on('data', function(chunk) {
     leftover = processLines(leftover, chunk);
@@ -115,28 +128,53 @@ async function streamProcessFile({file, lines}) {
     if (ix < 0) {
       return prevChars + newChars;
     }
-    // there is a newline in newChars.
+    // there is a newline in newChars. it's possible to
+    // just concatenate prevChars to newChars but there
+    // is a cost for making the chunk longer.
+
     let line = prevChars + newChars.substring(0, ix);
     lineCount += 1;
     let lastIx = ix + 1;
+    if (parse) {
+      processLine(line);
+    }
+    //let lastIx = 0;
+    //newChars = prevChars + newChars;
 
     while ((ix = newChars.indexOf('\n', lastIx)) >= 0) {
-      const line = newChars.substring(lastIx, ix);
+      line = newChars.substring(lastIx, ix);
       lineCount += 1;
       lastIx = ix + 1;
+      if (parse) {
+        processLine(line);
+      }
     }
 
     // return any leftover part
     return newChars.substring(lastIx);
   }
+
+  return p;
 }
 
-async function readProcessFile({file, lines: lineCount}) {
+async function readProcessFile({file, lines: lineCount, parse}) {
   const text = fs.readFileSync(file, 'utf8');
   const lines = text.split('\n');
   if (lines.length !== lineCount + 1) {
     throw new Error(`lines.length ${lines.length}`);
   }
+  if (!lines[lines.length - 1]) {
+    lines.length = lines.length - 1;
+  }
+  for (const line of lines) {
+    if (parse) {
+      processLine(line);
+    }
+  }
+}
+
+function processLine(line) {
+  return JSON.parse(line);
 }
 
 async function justWait() {
@@ -153,6 +191,7 @@ module.exports = {
   },
   tests: {
     // data sources
+    ginormous,
     giantFilename,
     bigFilename,
     tinyFilename,
