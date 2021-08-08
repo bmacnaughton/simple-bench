@@ -23,28 +23,36 @@ const b_giantfile = fs.readFileSync(giantfile);
 const b_bigfile = fs.readFileSync(bigfile);
 const b_tinyfile = fs.readFileSync(tinyfile);
 
-// create files of n lines
 
+// filename
+function giantFilename() {
+  return {file: giantfile, lines: 3872};
+}
+function bigFilename() {
+  return {file: bigfile, lines: 88};
+}
+function tinyFilename() {
+  return {file: tinyfile, lines: 4};
+}
+
+// text
 function giantFileAsText() {
   return _giantfile;
 }
-
 function bigFileAsText() {
   return _bigfile;
 }
-
 function tinyFileAsText() {
   return _tinyfile;
 }
 
+// buffer
 function giantFileAsBuffer() {
   return b_giantfile;
 }
-
 function bigFileAsBuffer() {
   return b_bigfile;
 }
-
 function tinyFileAsBuffer() {
   return b_tinyfile();
 }
@@ -79,6 +87,62 @@ function lastIxBuffer(b) {
   }
 }
 
+async function streamProcessFile({file, lines}) {
+  const s = fs.createReadStream(file, {encoding: 'utf8'});
+
+  let done = {};
+  const p = new Promise((resolve, reject) => {
+    done.resolve = resolve;
+    done.reject = reject;
+  })
+
+  let lineCount = 0;
+  s.on('end', function() {
+    if (lineCount !== lines) {
+      done.reject(`lineCount ${lineCount}`);
+    } else {
+      done.resolve();
+    }
+  });
+
+  let leftover = '';
+  s.on('data', function(chunk) {
+    leftover = processLines(leftover, chunk);
+  });
+
+  function processLines(prevChars, newChars) {
+    let ix = newChars.indexOf('\n');
+    if (ix < 0) {
+      return prevChars + newChars;
+    }
+    // there is a newline in newChars.
+    let line = prevChars + newChars.substring(0, ix);
+    lineCount += 1;
+    let lastIx = ix + 1;
+
+    while ((ix = newChars.indexOf('\n', lastIx)) >= 0) {
+      const line = newChars.substring(lastIx, ix);
+      lineCount += 1;
+      lastIx = ix + 1;
+    }
+
+    // return any leftover part
+    return newChars.substring(lastIx);
+  }
+}
+
+async function readProcessFile({file, lines: lineCount}) {
+  const text = fs.readFileSync(file, 'utf8');
+  const lines = text.split('\n');
+  if (lines.length !== lineCount + 1) {
+    throw new Error(`lines.length ${lines.length}`);
+  }
+}
+
+async function justWait() {
+  return new Promise(resolve => setTimeout(resolve, 10));
+}
+
 
 module.exports = {
   configure() {
@@ -89,6 +153,9 @@ module.exports = {
   },
   tests: {
     // data sources
+    giantFilename,
+    bigFilename,
+    tinyFilename,
     giantFileAsText,
     giantFileAsBuffer,
     bigFileAsText,
@@ -96,10 +163,14 @@ module.exports = {
     tinyFileAsText,
     tinyFileAsBuffer,
     // line splitters
+    streamProcessFile,
+    readProcessFile,
     split,
     regex,
     lastIxString,
     lastIxBuffer,
+    // consistency check
+    justWait,
   },
   setup(config) {
 
