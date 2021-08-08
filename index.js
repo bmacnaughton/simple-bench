@@ -46,10 +46,14 @@ for (const arg of args) {
   if (arg in tests) {
     // in theory a test can be a sequence of tests. that requires looping
     // on process.argv and adding tests to functionChain.
-    functionChain.push(tests[arg]);
+    if (tests[arg].constructor.name === 'AsyncFunction') {
+      functionChain.push(tests[arg]);
+    } else {
+      functionChain.push(async (x) => tests[arg](x));
+    }
   } else if (arg === 'noop') {
     // predefined noop function. can help determine baselines
-    functionChain.push(s => s);
+    functionChain.push(async s => s);
   } else {
     console.log('util.bench: invalid execute parameter:', arg);
     // eslint-disable-next-line
@@ -100,7 +104,7 @@ async function test() {
   }
   // warmup
   for (let i = warmupIterations; i > 0; i--) {
-    execute(functionChain);
+    await execute(functionChain);
   }
   await pause(groupWaitMS);
 
@@ -112,7 +116,7 @@ async function test() {
     }
     perf.mark('start-iteration');
     for (let i = groupIterations; i > 0; i--) {
-      execute(functionChain);
+      await execute(functionChain);
     }
     perf.measure('iteration-time', 'start-iteration');
     await pause(groupWaitMS);
@@ -127,10 +131,10 @@ async function test() {
 //
 // execute functionChains
 //
-function execute(fc) {
+async function execute(fc) {
   let lastResult = [];
   for (let i = 0; i < fc.length; i++) {
-    lastResult = fc[i](lastResult);
+    lastResult = await fc[i](lastResult);
   }
 }
 
