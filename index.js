@@ -55,7 +55,7 @@ for (const arg of args) {
     // predefined noop function. can help determine baselines
     functionChain.push(async s => s);
   } else {
-    console.log('util.bench: invalid execute parameter:', arg);
+    console.log('simple-bench: invalid function-chain function:', arg);
     // eslint-disable-next-line
     process.exit(1);
   }
@@ -148,6 +148,6 @@ async function pause(ms) {
 test().then(() => {
   obs.disconnect();
   const gcStats = {gcCounts, totalGCTime};
-  summarize({gTimes: groupTimes.slice(), gcStats, stddevRange});
+  summarize({gTimes: groupTimes.slice(), gcStats, stddevRange, config});
 });
 
