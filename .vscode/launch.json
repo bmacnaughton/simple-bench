@@ -17,6 +17,25 @@
         "giantFileAsText",
         "lastIxString"
       ]
+    },
+    {
+      "name": "current file",
+      "type": "pwa-node",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "args": [
+        "${input:args}"
+      ],
+      "program": "${relativeFile}"
+    },
+  ],
+  "inputs": [
+    {
+      "id": "args",
+      "type": "promptString",
+      "description": "enter argument"
     }
   ]
 }
