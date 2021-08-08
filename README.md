@@ -11,6 +11,8 @@ multiple functions can be given on the command line and their executions are
 chained, e.g., ` node index.js func1 func2`. in this example `func2` will be passed
 the return value of `func1`. this enables trying many different combinations without
 having to hardcode a function for each.
+- the function chain allows async functions; you can also just return a promise but it
+will get an async wrapper (async function detection uses the constructor name).
 - the function `noop` is predefined and can be used to evaluate the cost of a function
 in a function-chain or of the framework itself.
 
@@ -52,6 +54,7 @@ module.exports = {
     regex,
     lastIxString,
     lastIxBuffer,
+    async timeTest = () => new Promise(resolve => setTimeout(resolve, 10)),
   },
   // this is called before executing any tests. if the test needs to do any
   // setup based on the execution params it may do so here.
