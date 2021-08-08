@@ -38,6 +38,8 @@ console.log(`excluding group times outside ${stddevRange} * stddev`);
 const groupTimes = [];
 let gcCounts = 0;
 let totalGCTime = 0;
+let memCheck = false;
+const memory = Array(groupCount);
 
 // take from env?
 const args = process.argv.slice(2);
@@ -54,6 +56,8 @@ for (const arg of args) {
   } else if (arg === 'noop') {
     // predefined noop function. can help determine baselines
     functionChain.push(async s => s);
+  } else if (arg === '-m') {
+    memCheck = true;
   } else {
     console.log('simple-bench: invalid function-chain function:', arg);
     // eslint-disable-next-line
@@ -109,7 +113,7 @@ async function test() {
   await pause(groupWaitMS);
 
   // execute x groups of y iterations with a pause after each group
-  for (let i = groupCount; i > 0; i--) {
+  for (let i = 0; i < groupCount; i++) {
     // setup for the group
     if (groupSetup) {
       groupSetup(config);
@@ -119,6 +123,9 @@ async function test() {
       await execute(functionChain);
     }
     perf.measure('iteration-time', 'start-iteration');
+    if (memCheck) {
+      memory[i] = process.memoryUsage();
+    }
     await pause(groupWaitMS);
   }
 
@@ -147,7 +154,12 @@ async function pause(ms) {
 //
 test().then(() => {
   obs.disconnect();
+  const gTimes = groupTimes.slice();
   const gcStats = {gcCounts, totalGCTime};
-  summarize({gTimes: groupTimes.slice(), gcStats, stddevRange, config});
+  const data = {gTimes, gcStats, stddevRange, config};
+  if (memCheck) {
+    data.memory = memory;
+  }
+  summarize(data);
 });
 
