@@ -1,230 +1,122 @@
 'use strict';
 
-const fs = require('fs');
-
 /* eslint-disable no-unused-vars */
 
-/*
-  - file.split('\n')
-  - while (m = /([^\n]*?)\n/g.exec(file)) {...}
-  - lastIx = 0; while ((ix = file.indexOf('\n', last + 1)) >= 0) {substr...; lastIx = ix}
-  - previous but use buffer
- */
+// this has the extension 'js-x' so the tests won't try to run it
+const _ = require('lodash');
 
-const ginormousfile = 'data/ginormous.log';
-const giantfile = 'data/giantfile.log';
-const bigfile = 'data/bigfile.log';
-const tinyfile = 'data/tinyfile.log';
+const DEFAULT_TAG = 'untrusted';
 
-const _giantfile = fs.readFileSync(giantfile, 'utf8');
-const _bigfile = fs.readFileSync(bigfile, 'utf8');
-const _tinyfile = fs.readFileSync(tinyfile, 'utf8');
+// test definitions
+const logger = () => undefined;
 
-const b_giantfile = fs.readFileSync(giantfile);
-const b_bigfile = fs.readFileSync(bigfile);
-const b_tinyfile = fs.readFileSync(tinyfile);
-
-
-// filename
-function ginormous() {
-  return {file: ginormousfile, lines: 1000000};
-}
-function giantFilename() {
-  return {file: giantfile, lines: 154880};
-}
-function bigFilename() {
-  return {file: bigfile, lines: 3872};
-}
-function tinyFilename() {
-  return {file: tinyfile, lines: 4};
-}
-
-// augment the filename
-function addParse(config) {
-  config.parse = true;
-}
-
-// text
-function giantFileAsText() {
-  return _giantfile;
-}
-function bigFileAsText() {
-  return _bigfile;
-}
-function tinyFileAsText() {
-  return _tinyfile;
-}
-
-// buffer
-function giantFileAsBuffer() {
-  return b_giantfile;
-}
-function bigFileAsBuffer() {
-  return b_bigfile;
-}
-function tinyFileAsBuffer() {
-  return b_tinyfile();
-}
-
-function split(f) {
-  const lines = f.split('\n');
-}
-
-function regex(f) {
-  const re = /([^\n]*?)\n/g;
-  let m;
-  while ((m = re.exec(f))) {
-    const line = m[1];
-  }
-}
-
-function lastIxString(f) {
-  let ix;
-  let lastIx = 0;
-  while ((ix = f.indexOf('\n', lastIx)) >= 0) {
-    const line = f.substring(lastIx, ix);
-    lastIx = ix + 1;
-  }
-}
-
-function lastIxBuffer(b) {
-  let ix;
-  let lastIx = 0;
-  while ((ix = b.indexOf(10, lastIx)) >= 0) {
-    const line = b.toString('utf8', lastIx, ix);
-    lastIx = ix + 1;
-  }
-}
-
-async function streamProcessFile({file, lines, parse}) {
-  const s = fs.createReadStream(file, {encoding: 'utf8'});
-
-  let done = {};
-  const p = new Promise((resolve, reject) => {
-    done.resolve = resolve;
-    done.reject = reject;
-  })
-
-  let lineCount = 0;
-  s.on('end', function() {
-    if (lineCount !== lines) {
-      done.reject(`lineCount ${lineCount}`);
-    } else {
-      done.resolve();
-    }
-  });
-
-  s.on('error', function(e) {
-    done.reject(e);
-  })
-
-  let leftover = '';
-  s.on('data', function(chunk) {
-    leftover = processLines(leftover, chunk);
-  });
-
-  function processLines(prevChars, newChars) {
-    let ix = newChars.indexOf('\n');
-    if (ix < 0) {
-      return prevChars + newChars;
-    }
-    // there is a newline in newChars. it's possible to
-    // just concatenate prevChars to newChars but there
-    // is a cost for making the chunk longer.
-
-    let line = prevChars + newChars.substring(0, ix);
-    lineCount += 1;
-    let lastIx = ix + 1;
-    if (parse) {
-      processLine(line);
-    }
-    //let lastIx = 0;
-    //newChars = prevChars + newChars;
-
-    while ((ix = newChars.indexOf('\n', lastIx)) >= 0) {
-      line = newChars.substring(lastIx, ix);
-      lineCount += 1;
-      lastIx = ix + 1;
-      if (parse) {
-        processLine(line);
-      }
-    }
-
-    // return any leftover part
-    return newChars.substring(lastIx);
-  }
-
-  return p;
-}
-
-async function readProcessFile({file, lines: lineCount, parse}) {
-  const text = fs.readFileSync(file, 'utf8');
-  const lines = text.split('\n');
-  if (lines.length !== lineCount + 1) {
-    throw new Error(`lines.length ${lines.length}`);
-  }
-  if (!lines[lines.length - 1]) {
-    lines.length = lines.length - 1;
-  }
-  for (const line of lines) {
-    if (parse) {
-      processLine(line);
+class TagRangeV1 {
+  /**
+   * Validates the arguments to the contructor call.
+   * @param {number} start The starting index to track.
+   * @param {number} stop  The stopping index to track.
+   * @param {string} tag   The name of the tag.
+   */
+  static validate(start, stop, tag = DEFAULT_TAG) {
+    const bothFinite = _.isFinite(start) && _.isFinite(stop);
+    if (start > stop || !bothFinite) {
+      logger.debug(
+        'could not create tag %s with invalid range start: %s, stop %s.',
+        tag,
+        start,
+        stop
+      );
     }
   }
+
+  /**
+   * @param {number} start The starting index of string tracking on the data having the tag.
+   * @param {number} stop  The stopping index of string tracking on the data having the tag.
+   * @param {string?} tag  The name of the tag (default is "untrusted").
+   */
+  constructor(start, stop, tag = DEFAULT_TAG) {
+    TagRangeV1.validate(start, stop, tag);
+    /** @type {string} */
+    this.tag = tag;
+    /** @type {number} */
+    this.start = start;
+    /** @type {number} */
+    this.stop = stop;
+  }
 }
 
-function processLine(line) {
-  return JSON.parse(line);
+class TagRangeV2 {
+  static validate(start, stop, tag) {
+    if (!(start <= stop && start >= 0 && stop < Infinity)) {
+      logger.debug(
+        'could not create tag %s with invalid range start: %s, stop %s.',
+        tag,
+        start,
+        stop
+      );
+    }
+  }
+  constructor(start, stop, tag = DEFAULT_TAG) {
+    TagRangeV2.validate(start, stop, tag);
+    /** @type {string} */
+    this.tag = tag;
+    /** @type {number} */
+    this.start = start;
+    /** @type {number} */
+    this.stop = stop;
+  }
 }
 
-async function justWait() {
-  return new Promise(resolve => setTimeout(resolve, 10));
+class TagRangeV3 {
+  constructor(start, stop, tag = DEFAULT_TAG) {
+    if (!(start <= stop && start >= 0)) {
+      logger.debug(
+        'could not create tag %s with invalid range start: %s, stop %s.',
+        tag,
+        start,
+        stop
+      );
+    }
+    /** @type {string} */
+    this.tag = tag;
+    /** @type {number} */
+    this.start = start;
+    /** @type {number} */
+    this.stop = stop;
+  }
 }
 
+function v1() {
+  for (let i = 0; i < 1000000; i++) {
+    new TagRangeV1(0, 11, DEFAULT_TAG);
+  }
+}
+
+function v2() {
+  for (let i = 0; i < 1000000; i++) {
+    new TagRangeV2(0, 11, DEFAULT_TAG);
+  }
+}
+
+function v3() {
+  for (let i = 0; i < 1000000; i++) {
+    new TagRangeV3(0, 11, DEFAULT_TAG);
+  }
+}
 
 module.exports = {
   configure() {
     return {
-      groupIterations: 100,
-      groupWaitMS: 1000,
+      groupIterations: 10,
+      groupWaitMS: 500,
     };
   },
   tests: {
-    // data sources
-    ginormous,
-    giantFilename,
-    bigFilename,
-    tinyFilename,
-    giantFileAsText,
-    giantFileAsBuffer,
-    bigFileAsText,
-    bigFileAsBuffer,
-    tinyFileAsText,
-    tinyFileAsBuffer,
-    // line splitters
-    streamProcessFile,
-    readProcessFile,
-    split,
-    regex,
-    lastIxString,
-    lastIxBuffer,
-    // consistency check
-    justWait,
+    v1,
+    v2,
+    v3,
   },
   setup(config) {
-
   },
 
 };
-
-if (!module.parent) {
-  /* eslint-disable no-console */
-  const f = fs.readFileSync('route-metrics.json', 'utf8');
-  const b = fs.readFileSync('route-metrics.json');
-  console.log('string');
-  lastIxString(f);
-  console.log('buffer');
-  lastIxBuffer(b);
-  console.log('regex');
-  regex(f);
-}
