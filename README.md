@@ -15,6 +15,9 @@ having to hardcode a function for each.
 will get an async wrapper (async function detection uses the constructor name).
 - the function `noop` is predefined and can be used to evaluate the cost of a function
 in a function-chain or of the framework itself.
+- if the work done by the function is very small relative to the work done by simple-bench,
+then it may be necessary to loop within the test function to offset simple-bench's base
+level overhead.
 
 ## test-definitions.js in more detail
 
