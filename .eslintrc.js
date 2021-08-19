@@ -44,7 +44,7 @@ module.exports = {
     "use-isnan": 2,
     "valid-typeof": 2,
     "no-var": 2,
-    "object-curly-spacing": [2, "never"],
+    "object-curly-spacing": [0, "never"],
     "no-constant-condition": [2, {"checkLoops": false}],
 
     // Best Practices
