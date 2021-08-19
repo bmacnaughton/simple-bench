@@ -99,11 +99,11 @@ function lastIxBuffer(b) {
 async function streamProcessFile({file, lines, parse}) {
   const s = fs.createReadStream(file, {encoding: 'utf8'});
 
-  let done = {};
+  const done = {};
   const p = new Promise((resolve, reject) => {
     done.resolve = resolve;
     done.reject = reject;
-  })
+  });
 
   let lineCount = 0;
   s.on('end', function() {
@@ -116,7 +116,7 @@ async function streamProcessFile({file, lines, parse}) {
 
   s.on('error', function(e) {
     done.reject(e);
-  })
+  });
 
   let leftover = '';
   s.on('data', function(chunk) {
@@ -181,7 +181,7 @@ async function justWait() {
   return new Promise(resolve => setTimeout(resolve, 10));
 }
 
-let array = [];
+const array = [];
 function items() {
   return array;
 }
