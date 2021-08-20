@@ -1,122 +1,112 @@
 'use strict';
 
+const oldTracker = require('./old-tracker');
+const newTracker = require('./new-tracker');
+
+let trackedCount = 0;
+let untrackedCount = 0;
+
 /* eslint-disable no-unused-vars */
 
-// this has the extension 'js-x' so the tests won't try to run it
-const _ = require('lodash');
-
-const DEFAULT_TAG = 'untrusted';
-
-// test definitions
-const logger = () => undefined;
-
-class TagRangeV1 {
-  /**
-   * Validates the arguments to the contructor call.
-   * @param {number} start The starting index to track.
-   * @param {number} stop  The stopping index to track.
-   * @param {string} tag   The name of the tag.
-   */
-  static validate(start, stop, tag = DEFAULT_TAG) {
-    const bothFinite = _.isFinite(start) && _.isFinite(stop);
-    if (start > stop || !bothFinite) {
-      logger.debug(
-        'could not create tag %s with invalid range start: %s, stop %s.',
-        tag,
-        start,
-        stop
-      );
-    }
-  }
-
-  /**
-   * @param {number} start The starting index of string tracking on the data having the tag.
-   * @param {number} stop  The stopping index of string tracking on the data having the tag.
-   * @param {string?} tag  The name of the tag (default is "untrusted").
-   */
-  constructor(start, stop, tag = DEFAULT_TAG) {
-    TagRangeV1.validate(start, stop, tag);
-    /** @type {string} */
-    this.tag = tag;
-    /** @type {number} */
-    this.start = start;
-    /** @type {number} */
-    this.stop = stop;
-  }
+function n1000000() {
+  return 1000000;
 }
 
-class TagRangeV2 {
-  static validate(start, stop, tag) {
-    if (!(start <= stop && start >= 0 && stop < Infinity)) {
-      logger.debug(
-        'could not create tag %s with invalid range start: %s, stop %s.',
-        tag,
-        start,
-        stop
-      );
-    }
-  }
-  constructor(start, stop, tag = DEFAULT_TAG) {
-    TagRangeV2.validate(start, stop, tag);
-    /** @type {string} */
-    this.tag = tag;
-    /** @type {number} */
-    this.start = start;
-    /** @type {number} */
-    this.stop = stop;
-  }
+// track & get
+function oldTG() {
+  const tracked = oldTracker.track('a string');
+  return oldTracker.getData(tracked);
+}
+function oldTGrS() {
+  const tracked = oldTracker.track('a string');
+  // to stay parallel
+  oldTracker.getData(tracked);
+  return tracked;
+}
+function oldTrS() {
+  return oldTracker.track('a string');
 }
 
-class TagRangeV3 {
-  constructor(start, stop, tag = DEFAULT_TAG) {
-    if (!(start <= stop && start >= 0)) {
-      logger.debug(
-        'could not create tag %s with invalid range start: %s, stop %s.',
-        tag,
-        start,
-        stop
-      );
-    }
-    /** @type {string} */
-    this.tag = tag;
-    /** @type {number} */
-    this.start = start;
-    /** @type {number} */
-    this.stop = stop;
-  }
+function newTG() {
+  const {str, props} = newTracker.track('a string');
+  return props;
+}
+function newTGrS() {
+  const {str, props} = newTracker.track('a string');
+  return str;
+}
+function newTrS() {
+  const {str} = newTracker.track('a string');
+  return str;
 }
 
-function v1() {
-  for (let i = 0; i < 1000000; i++) {
-    new TagRangeV1(0, 11, DEFAULT_TAG);
+function oldCheckTracked(s) {
+  if (oldTracker.getData(s).tracked) {
+    trackedCount += 1;
+  } else {
+    untrackedCount += 1;
   }
+  return s;
 }
 
-function v2() {
-  for (let i = 0; i < 1000000; i++) {
-    new TagRangeV2(0, 11, DEFAULT_TAG);
+function newCheckTracked(s) {
+  const props = newTracker.getData(s);
+  if (props) {
+    trackedCount += 1;
+  } else {
+    untrackedCount += 1;
   }
+  return s;
 }
 
-function v3() {
-  for (let i = 0; i < 1000000; i++) {
-    new TagRangeV3(0, 11, DEFAULT_TAG);
+function oldG(s = 'a string') {
+  const d = oldTracker.getData(s);
+  if (d.tracked) {
+    return d;
   }
+  return null;
 }
+
+function newG(s = 'a string') {
+  const d = newTracker.getData(s);
+  if (d) {
+    return d;
+  }
+  return null;
+}
+
 
 module.exports = {
   configure() {
     return {
-      groupIterations: 10,
+      // warmupIterations: 100,
+      warmupIterations: 1000,
+      // groupCount: 10,
+      groupCount: 10,
+      // groupIterations: 100000,
+      groupIterations: 1000000,
+      // groupWaitMS: 1000,
       groupWaitMS: 500,
     };
   },
   tests: {
-    v1,
-    v2,
-    v3,
+    n1000000,
+
+    oldTG,
+    oldTGrS,
+    oldTrS,
+    oldCheckTracked,
+
+    newTG,
+    newTGrS,
+    newTrS,
+    newCheckTracked,
   },
   setup(config) {
   },
+  final() {
+    // eslint-disable-next-line no-console
+    console.log('tracked', trackedCount, 'untracked', untrackedCount);
+  }
 
 };

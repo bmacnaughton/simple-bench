@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 'use strict';
 
 const {summarize} = require('./lib/summarize');
@@ -5,14 +6,20 @@ const {summarize} = require('./lib/summarize');
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
-// this file executes tests it imports from
+// this file executes tests imported from
 // test-definitions.
 
 const perf_hooks = require('perf_hooks');
 const {performance: perf, PerformanceObserver: PerfObserver} = perf_hooks;
 const util = require('util');
 
-const {configure, setup, groupSetup, tests} = require('./test-definitions');
+const {
+  configure,
+  setup,
+  groupSetup,
+  tests,
+  final
+} = require('./test-definitions');
 
 const defaultConfig = {
   warmupIterations: 100,
@@ -32,8 +39,8 @@ const {
   stddevRange,
 } = config;
 
-console.log(`executing ${groupCount} groups of ${groupIterations} iterations (${groupWaitMS}ms intergroup pause)`);
-console.log(`excluding group times outside ${stddevRange} * stddev`);
+console.log(`[executing ${groupCount} groups of ${groupIterations} iterations (${groupWaitMS}ms intergroup pause)]`);
+console.log(`[excluding group times outside ${stddevRange} * stddev]`);
 
 const groupTimes = [];
 let gcCounts = 0;
@@ -46,12 +53,12 @@ const args = process.argv.slice(2);
 const functionChain = [];
 for (const arg of args) {
   if (arg in tests) {
-    // in theory a test can be a sequence of tests. that requires looping
+    // a test can be a sequence of tests. that requires looping
     // on process.argv and adding tests to functionChain.
     if (tests[arg].constructor.name === 'AsyncFunction') {
       functionChain.push(tests[arg]);
     } else {
-      functionChain.push(async (x) => tests[arg](x));
+      functionChain.push(async x => tests[arg](x));
     }
   } else if (arg === 'noop') {
     // predefined noop function. can help determine baselines
@@ -74,7 +81,7 @@ const gcTypes = {
 };
 
 //
-// setup measurements
+// setup measurements with performance hooks
 //
 const verbose = process.env.VERBOSE;
 
@@ -96,7 +103,7 @@ const obs = new PerfObserver((list) => {
 obs.observe({entryTypes: ['measure', 'gc'], buffered: true});
 
 //
-// function to run the tests
+// function to run the setups, tests, and final.
 //
 async function test() {
   // call the tester's setup
@@ -159,6 +166,11 @@ test().then(() => {
   const data = {gTimes, gcStats, stddevRange, config};
   if (memCheck) {
     data.memory = memory;
+  }
+  // if the test-definitions specifies a final execute it. it can
+  // be output or cleanup or whatever.
+  if (final) {
+    final();
   }
   summarize(data);
 });
