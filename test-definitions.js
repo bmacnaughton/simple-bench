@@ -1,80 +1,94 @@
 'use strict';
 
-const oldTracker = require('./old-tracker');
-const newTracker = require('./new-tracker');
+const tracker = require('./tracker');
 
 let trackedCount = 0;
 let untrackedCount = 0;
 
+// kind of a tightly coupled hack with hardcoded max
+const strings = require('./string-array.json');
+let ix = 0;
+
 /* eslint-disable no-unused-vars */
 
-function n1000000() {
-  return 1000000;
-}
-
-// track & get
-function oldTG() {
-  const tracked = oldTracker.track('a string');
-  return oldTracker.getData(tracked);
-}
-function oldTGrS() {
-  const tracked = oldTracker.track('a string');
-  // to stay parallel
-  oldTracker.getData(tracked);
-  return tracked;
-}
-function oldTrS() {
-  return oldTracker.track('a string');
-}
-
-function newTG() {
-  const {str, props} = newTracker.track('a string');
-  return props;
-}
-function newTGrS() {
-  const {str, props} = newTracker.track('a string');
-  return str;
-}
-function newTrS() {
-  const {str} = newTracker.track('a string');
-  return str;
-}
-
-function oldCheckTracked(s) {
-  if (oldTracker.getData(s).tracked) {
+// track & get simulate API with pre-existing code
+function trackAndGet() {
+  const str = tracker.track(strings[ix++]);
+  const props = tracker.getData(str);
+  if (props.tracked) {
     trackedCount += 1;
   } else {
     untrackedCount += 1;
   }
-  return s;
 }
 
-function newCheckTracked(s) {
-  const props = newTracker.getData(s);
-  if (props) {
+function trackAndGet2() {
+  const result = tracker.track2(strings[ix++]);
+  if (result) {
     trackedCount += 1;
   } else {
     untrackedCount += 1;
   }
-  return s;
 }
 
-function oldG(s = 'a string') {
-  const d = oldTracker.getData(s);
-  if (d.tracked) {
-    return d;
+function process(data) {
+  if (data && data.props.tracked) {
+    trackedCount += 1;
+  } else {
+    untrackedCount += 1;
   }
-  return null;
 }
 
-function newG(s = 'a string') {
-  const d = newTracker.getData(s);
-  if (d) {
-    return d;
+
+// tagRange construction
+class Properties {
+  constructor() {
+    this.event = null;
+    this.tagRanges = [];
+    this.tracked = true;
   }
-  return null;
+  static make() {
+    return {
+      event: null,
+      tagRanges: [],
+      tracked: true
+    };
+  }
+
+  static populate(o = {}) {
+    o.event = null;
+    o.tagRanges = [];
+    o.tracked = true;
+  }
+
+  static populateAndReturn(o = {}) {
+    o.event = null;
+    o.tagRanges = [];
+    o.tracked = true;
+    return o;
+  }
 }
 
+function construct() {
+  return new Properties();
+}
+
+function make() {
+  return Properties.make();
+}
+
+function populate() {
+  return Properties.populate();
+}
+
+function populateAndReturn() {
+  return Properties.populateAndReturn();
+}
+
+function constructAndAssign() {
+  const props = Object.assign({}, new Properties());
+  //return Object.assign({}, p);
+}
 
 module.exports = {
   configure() {
@@ -90,19 +104,38 @@ module.exports = {
     };
   },
   tests: {
-    n1000000,
+    n1: () => 1,
+    n1000: () => 1000,
+    n10000: () => 10000,
+    n1000000: () => 1000000,
 
-    oldTG,
-    oldTGrS,
-    oldTrS,
-    oldCheckTracked,
+    doMake: (n) => {return {n, fn: make}},
+    doConstruct: (n) => {return {n, fn: construct}},
+    doPopulate: (n) => {return {n, fn: populate}},
+    doPopulateAndReturn: (n) => {return {n, fn: populateAndReturn}},
+    doConstructAndAssign: (n) => {return {n, fn: constructAndAssign}},
 
-    newTG,
-    newTGrS,
-    newTrS,
-    newCheckTracked,
+    execute: ({n, fn}) => {
+      while (n-- > 0) {
+        fn();
+      }
+    },
+
+
+    trackAndGet,
+    trackAndGet2,
+    process,
+
+    construct,
+    make,
+    populate,
+    populateAndReturn,
+
   },
   setup(config) {
+  },
+  groupSetup(config) {
+    ix = 0;
   },
   final() {
     // eslint-disable-next-line no-console

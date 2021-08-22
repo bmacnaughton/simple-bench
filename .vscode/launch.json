@@ -8,18 +8,29 @@
     {
       "type": "pwa-node",
       "request": "launch",
-      "name": "needs args",
+      "name": "manual args",
       "skipFiles": [
         "<node_internals>/**"
       ],
       "program": "${workspaceFolder}/index.js",
       "args": [
-        "giantFileAsText",
-        "lastIxString"
+        "noop"
       ]
     },
     {
-      "name": "current file",
+      "type": "pwa-node",
+      "request": "launch",
+      "name": "index, prompt",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "program": "${workspaceFolder}/index.js",
+      "args": [
+        "${input:args}"
+      ]
+    },
+    {
+      "name": "current prompt",
       "type": "pwa-node",
       "request": "launch",
       "skipFiles": [

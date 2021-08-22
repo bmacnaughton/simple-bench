@@ -21,6 +21,13 @@ const {
   final
 } = require('./test-definitions');
 
+if (!tests.noop) {
+  tests.noop = async s => s;
+}
+if (!tests.noop2) {
+  tests.noop2 = async() => undefined;
+}
+
 const defaultConfig = {
   warmupIterations: 100,
   groupIterations: 100000,
@@ -39,17 +46,22 @@ const {
   stddevRange,
 } = config;
 
-console.log(`[executing ${groupCount} groups of ${groupIterations} iterations (${groupWaitMS}ms intergroup pause)]`);
-console.log(`[excluding group times outside ${stddevRange} * stddev]`);
-
+//
+// this mess of args parsing probably belongs in another module.
+//
 const groupTimes = [];
 let gcCounts = 0;
 let totalGCTime = 0;
 let memCheck = false;
+let debug = false;
 const memory = Array(groupCount);
-
+const functionNames = [];
 // take from env?
-const args = process.argv.slice(2);
+let args = process.argv.slice(2);
+// this little trick is to deal with vscode's debugger "prompt"
+if (args.length === 1 && args[0].includes(',')) {
+  args = args[0].split(',');
+}
 const functionChain = [];
 for (const arg of args) {
   if (arg in tests) {
@@ -58,19 +70,30 @@ for (const arg of args) {
     if (tests[arg].constructor.name === 'AsyncFunction') {
       functionChain.push(tests[arg]);
     } else {
+      //const fn = {async [arg](x) {return tests[arg](x)}};
       functionChain.push(async x => tests[arg](x));
     }
-  } else if (arg === 'noop') {
-    // predefined noop function. can help determine baselines
-    functionChain.push(async s => s);
+    functionNames.push(arg);
   } else if (arg === '-m') {
     memCheck = true;
+  } else if (arg === '-d') {
+    debug = true;
   } else {
     console.log('simple-bench: invalid function-chain function:', arg);
     // eslint-disable-next-line
     process.exit(1);
   }
 }
+
+
+console.log(`[executing ${groupCount} groups of ${groupIterations} iterations (${groupWaitMS}ms intergroup pause)]`);
+console.log(`[function chain: ${functionNames.join(', ')}]`);
+if (debug) {
+  for (const fn of functionChain) {
+    console.log(fn.constructor.name);
+  }
+}
+console.log(`[excluding group times outside ${stddevRange} * stddev]`);
 
 
 const gcTypes = {
