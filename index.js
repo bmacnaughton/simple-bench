@@ -24,8 +24,8 @@ const {
 if (!tests.noop) {
   tests.noop = async s => s;
 }
-if (!tests.noop2) {
-  tests.noop2 = async() => undefined;
+if (!tests.noopu) {
+  tests.noopu = async() => undefined;
 }
 
 const defaultConfig = {

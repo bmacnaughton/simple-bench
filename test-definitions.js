@@ -69,6 +69,10 @@ class Properties {
   }
 }
 
+function object() {
+  return {};
+}
+
 function construct() {
   return new Properties();
 }
@@ -77,17 +81,21 @@ function make() {
   return Properties.make();
 }
 
+function assign() {
+  const source = {event: null, tagRanges: [], tracked: true};
+  Object.assign({}, source);
+}
+
 function populate() {
-  return Properties.populate();
+  Properties.populate();
 }
 
 function populateAndReturn() {
   return Properties.populateAndReturn();
 }
 
-function constructAndAssign() {
-  const props = Object.assign({}, new Properties());
-  //return Object.assign({}, p);
+function constructAndAssign(o = {}) {
+  Object.assign(o, new Properties());
 }
 
 module.exports = {
@@ -100,7 +108,7 @@ module.exports = {
       // groupIterations: 100000,
       groupIterations: 1000000,
       // groupWaitMS: 1000,
-      groupWaitMS: 500,
+      groupWaitMS: 250,
     };
   },
   tests: {
@@ -110,6 +118,7 @@ module.exports = {
     n1000000: () => 1000000,
 
     doMake: (n) => {return {n, fn: make}},
+    doAssign: (n) => {return {n, fn: assign}},
     doConstruct: (n) => {return {n, fn: construct}},
     doPopulate: (n) => {return {n, fn: populate}},
     doPopulateAndReturn: (n) => {return {n, fn: populateAndReturn}},
@@ -121,13 +130,14 @@ module.exports = {
       }
     },
 
-
     trackAndGet,
     trackAndGet2,
     process,
 
+    object,
     construct,
     make,
+    assign,
     populate,
     populateAndReturn,
 

@@ -41,9 +41,10 @@ module.exports = {
   // can be run against different data without a specific test for each
   // combination.
   //
-  // there is a built-in test, noop, that does nothing other than return
-  // its parameter. it can used to evaluate the baseline cost of the test
-  // framework or components in a function chain.
+  // there are built-in tests, noop and noopu. noop does nothing other than return
+  // its parameter. noopu does not have a parameter and returns undefined. they can
+  // be used to evaluate the baseline cost of the test framework or components in a
+  // function chain.
   tests: {
     // these are data sources
     giantFileAsText,
