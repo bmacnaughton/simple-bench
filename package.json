@@ -10,7 +10,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "fast-json-stringify": "^2.7.8",
+    "lodash": "^4.17.21"
+  },
   "devDependencies": {
     "@bmacnaughton/string-generator": "^2.0.0",
     "eslint": "^7.32.0"

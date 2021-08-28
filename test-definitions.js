@@ -1,6 +1,12 @@
 'use strict';
 
-const tracker = require('./tracker');
+const _ = require('lodash');
+//const tracker = require('./tracker');
+const tracker = {};
+const fjStringify = require('fast-json-stringify');
+const tenK = require('./data/10000.txt');
+
+const FAST = {stringify: fjStringify({})};
 
 let trackedCount = 0;
 let untrackedCount = 0;
@@ -98,6 +104,46 @@ function constructAndAssign(o = {}) {
   Object.assign(o, new Properties());
 }
 
+function JStringify() {
+  JSON.stringify(tenK);
+}
+
+function FJStringify() {
+  FAST.stringify(tenK);
+}
+
+const fetchObject = {
+  property_1: {
+    a: {
+      b: {
+        c: {
+          d: "Hello"
+        }
+      }
+    }
+  }
+}
+
+function directFetch(n = 1) {
+  for (let i = 0; i < n; i++) {
+    fetchObject.property_1.a.b.c.d;
+  }
+}
+
+const preSplit = 'property_1.a.b.c.d'.split('.');
+function lodashSplitFetch(n = 1) {
+  for (let i = 0; i < n; i++) {
+    _.get(fetchObject, preSplit);
+  }
+}
+
+function lodashFetch(n = 1) {
+  for (let i = 0; i < n; i++) {
+    _.get(fetchObject, 'property_1.a.b.c.d');
+  }
+}
+
+
 module.exports = {
   configure() {
     return {
@@ -113,6 +159,7 @@ module.exports = {
   },
   tests: {
     n1: () => 1,
+    n100: () => 100,
     n1000: () => 1000,
     n10000: () => 10000,
     n1000000: () => 1000000,
@@ -141,6 +188,12 @@ module.exports = {
     populate,
     populateAndReturn,
 
+    JStringify,
+    FJStringify,
+
+    directFetch,
+    lodashFetch,
+    lodashSplitFetch,
   },
   setup(config) {
   },
