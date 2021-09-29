@@ -1,101 +1,38 @@
 'use strict';
 
-const tracker = require('./tracker');
+const fs = require('fs');
 
-let trackedCount = 0;
-let untrackedCount = 0;
+const napi = require('./processors/package-template.linux-x64-gnu.node');
+const wasm = require('./processors/pkg');
 
-// kind of a tightly coupled hack with hardcoded max
-const strings = require('./string-array.json');
-let ix = 0;
+const stopChars = ";$'</\\&#%>=";
+const napiStopChars = Buffer.from(stopChars);
+const wasmStopChars = new Uint8Array(napiStopChars);
 
-/* eslint-disable no-unused-vars */
+function small() {
+  return './data/small-file.txt';
+}
+function large() {
+  return './data/large-file.txt';
+}
 
-// track & get simulate API with pre-existing code
-function trackAndGet() {
-  const str = tracker.track(strings[ix++]);
-  const props = tracker.getData(str);
-  if (props.tracked) {
-    trackedCount += 1;
-  } else {
-    untrackedCount += 1;
+function open(file = './data/large-file.txt') {
+  return fs.createReadStream(file);
+}
+
+async function processNapi(stream) {
+  const scanner = new napi.Scanner(napiStopChars);
+
+  for await (const buffer of stream) {
+    scanner.suspicious(buffer);
   }
 }
+async function processWasm(stream) {
+  const scanner = new wasm.Scanner(wasmStopChars);
 
-function trackAndGet2() {
-  const result = tracker.track2(strings[ix++]);
-  if (result) {
-    trackedCount += 1;
-  } else {
-    untrackedCount += 1;
+  for await (const buffer of stream) {
+    scanner.suspicious(new Uint8Array(buffer));
   }
-}
-
-function process(data) {
-  if (data && data.props.tracked) {
-    trackedCount += 1;
-  } else {
-    untrackedCount += 1;
-  }
-}
-
-
-// tagRange construction
-class Properties {
-  constructor() {
-    this.event = null;
-    this.tagRanges = [];
-    this.tracked = true;
-  }
-  static make() {
-    return {
-      event: null,
-      tagRanges: [],
-      tracked: true
-    };
-  }
-
-  static populate(o = {}) {
-    o.event = null;
-    o.tagRanges = [];
-    o.tracked = true;
-  }
-
-  static populateAndReturn(o = {}) {
-    o.event = null;
-    o.tagRanges = [];
-    o.tracked = true;
-    return o;
-  }
-}
-
-function object() {
-  return {};
-}
-
-function construct() {
-  return new Properties();
-}
-
-function make() {
-  return Properties.make();
-}
-
-function assign() {
-  const source = {event: null, tagRanges: [], tracked: true};
-  Object.assign({}, source);
-}
-
-function populate() {
-  Properties.populate();
-}
-
-function populateAndReturn() {
-  return Properties.populateAndReturn();
-}
-
-function constructAndAssign(o = {}) {
-  Object.assign(o, new Properties());
 }
 
 module.exports = {
@@ -106,7 +43,7 @@ module.exports = {
       // groupCount: 10,
       groupCount: 10,
       // groupIterations: 100000,
-      groupIterations: 1000000,
+      groupIterations: 10000,
       // groupWaitMS: 1000,
       groupWaitMS: 250,
     };
@@ -117,39 +54,19 @@ module.exports = {
     n10000: () => 10000,
     n1000000: () => 1000000,
 
-    doMake: (n) => {return {n, fn: make}},
-    doAssign: (n) => {return {n, fn: assign}},
-    doConstruct: (n) => {return {n, fn: construct}},
-    doPopulate: (n) => {return {n, fn: populate}},
-    doPopulateAndReturn: (n) => {return {n, fn: populateAndReturn}},
-    doConstructAndAssign: (n) => {return {n, fn: constructAndAssign}},
-
-    execute: ({n, fn}) => {
-      while (n-- > 0) {
-        fn();
-      }
-    },
-
-    trackAndGet,
-    trackAndGet2,
-    process,
-
-    object,
-    construct,
-    make,
-    assign,
-    populate,
-    populateAndReturn,
+    small,
+    large,
+    open,
+    processNapi,
+    processWasm,
 
   },
   setup(config) {
   },
   groupSetup(config) {
-    ix = 0;
   },
   final() {
     // eslint-disable-next-line no-console
-    console.log('tracked', trackedCount, 'untracked', untrackedCount);
+    //console.log('tracked', trackedCount, 'untracked', untrackedCount);
   }
-
 };
