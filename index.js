@@ -70,7 +70,6 @@ for (const arg of args) {
     if (tests[arg].constructor.name === 'AsyncFunction') {
       functionChain.push(tests[arg]);
     } else {
-      //const fn = {async [arg](x) {return tests[arg](x)}};
       functionChain.push(async x => tests[arg](x));
     }
     functionNames.push(arg);
@@ -84,6 +83,7 @@ for (const arg of args) {
     process.exit(1);
   }
 }
+config.functionChain = functionNames.slice();
 
 
 console.log(`[executing ${groupCount} groups of ${groupIterations} iterations (${groupWaitMS}ms intergroup pause)]`);
@@ -131,10 +131,10 @@ obs.observe({entryTypes: ['measure', 'gc'], buffered: true});
 async function test() {
   // call the tester's setup
   if (setup) {
-    setup(config);
+    await (async() => setup(config))();
   }
   if (groupSetup) {
-    groupSetup(config);
+    await (async() => groupSetup(config))();
   }
   // warmup
   for (let i = warmupIterations; i > 0; i--) {
@@ -146,7 +146,7 @@ async function test() {
   for (let i = 0; i < groupCount; i++) {
     // setup for the group
     if (groupSetup) {
-      groupSetup(config);
+      await (async() => groupSetup(config))();
     }
     perf.mark('start-iteration');
     for (let i = groupIterations; i > 0; i--) {
@@ -193,7 +193,7 @@ test().then(() => {
   // if the test-definitions specifies a final execute it. it can
   // be output or cleanup or whatever.
   if (final) {
-    final();
+    final(config);
   }
   summarize(data);
 });
