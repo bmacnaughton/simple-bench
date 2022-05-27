@@ -77,6 +77,10 @@ for (const arg of args) {
     memCheck = true;
   } else if (arg === '-d') {
     debug = true;
+  } else if (arg === '-h' || arg === '--help') {
+    console.log('simple-bench function-chain');
+    console.log('all times reported in milliseconds');
+    process.exit(0);
   } else {
     console.log('simple-bench: invalid function-chain function:', arg);
     // eslint-disable-next-line
