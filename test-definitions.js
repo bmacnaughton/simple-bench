@@ -1,13 +1,18 @@
 'use strict';
 
 const fs = require('fs');
+const lib = require('@contrast/agent-lib');
+const al = new lib.Agent();
 
-const napi = require('./processors/package-template.linux-x64-gnu.node');
-const wasm = require('./processors/pkg');
+const issue38 = require('./issue-38.json');
+const issue38json = fs.readFileSync('./issue-38.json');
+const issue38buffer = Buffer.from(issue38json);
 
-const stopChars = ";$'</\\&#%>=";
-const napiStopChars = Buffer.from(stopChars);
-const wasmStopChars = new Uint8Array(napiStopChars);
+
+const strings = [];
+for (let i = 0; i < 1; i++) {
+  strings.push('a'.repeat(1));
+}
 
 function small() {
   return './data/small-file.txt';
@@ -20,58 +25,95 @@ function open(file = './data/large-file.txt') {
   return fs.createReadStream(file);
 }
 
-async function processNapi(stream) {
-  const scanner = new napi.Scanner(napiStopChars);
-
-  for await (const buffer of stream) {
-    scanner.suspicious(buffer);
+function simpleTraverse(obj, cb) {
+  if (typeof obj !== 'object' || obj === null) {
+    return;
   }
-}
-async function processWasm(stream) {
-  const scanner = new wasm.Scanner(wasmStopChars);
-
-  for await (const buffer of stream) {
-    scanner.suspicious(new Uint8Array(buffer));
-  }
-}
-
-function JStringify() {
-  JSON.stringify(tenK);
-}
-
-function FJStringify() {
-  FAST.stringify(tenK);
-}
-
-const fetchObject = {
-  property_1: {
-    a: {
-      b: {
-        c: {
-          d: "Hello"
+  const path = [];
+  /* eslint-disable complexity */
+  function traverse(obj) {
+    const isArray = Array.isArray(obj);
+    for (const k in obj) {
+      if (isArray) {
+        // if it is an array, store each index in path but don't call the
+        // callback on the index itself as they are just numeric strings.
+        path.push(k);
+        if (typeof obj[k] === 'object' && obj[k] !== null) {
+          traverse(obj[k]);
+        } else if (typeof obj[k] === 'string' && obj[k]) {
+          cb(path, 'Value', obj[k]);
+        }
+        path.pop();
+      } else if (typeof obj[k] === 'object' && obj[k] !== null) {
+        cb(path, 'Key', k);
+        path.push(k);
+        traverse(obj[k]);
+        path.pop();
+      } else {
+        cb(path, 'Key', k);
+        // only callback if the value is a non-empty string
+        if (typeof obj[k] === 'string' && obj[k]) {
+          path.push(k);
+          cb(path, 'Value', obj[k]);
+          path.pop();
         }
       }
     }
   }
+
+  traverse(obj);
 }
 
-function directFetch(n = 1) {
-  for (let i = 0; i < n; i++) {
-    fetchObject.property_1.a.b.c.d;
-  }
+function simpleTraverse38() {
+  simpleTraverse(issue38, () => {});
 }
 
-const preSplit = 'property_1.a.b.c.d'.split('.');
-function lodashSplitFetch(n = 1) {
-  for (let i = 0; i < n; i++) {
-    _.get(fetchObject, preSplit);
-  }
+function traverse(object, callback) {
+  if (object === null || typeof object !== 'object')
+    return;
+  const recurse = (obj, prevPath = []) => {
+    const isArray = Array.isArray(obj);
+    Object.entries(obj).forEach(([key, val]) => {
+      // don't call the callback on array indices.
+      if (!isArray) {
+        callback(prevPath, 'Key', key);
+      }
+      const path = [...prevPath, key];
+      if (val !== null && typeof val === 'object') {
+        recurse(val, path);
+      }
+      else if (typeof val === 'string' && val) {
+        callback(path, 'Value', val);
+      }
+    });
+  };
+  recurse(object);
 }
 
-function lodashFetch(n = 1) {
-  for (let i = 0; i < n; i++) {
-    _.get(fetchObject, 'property_1.a.b.c.d');
-  }
+function traverse38() {
+  traverse(issue38, () => {});
+}
+
+const preferWW = {preferWorthWatching: true};
+function agentLibParse(last) {
+  const rules = last.length ? last[0] : 1;
+  al.scoreRequestUnknownBody(rules, issue38buffer, preferWW);
+  // simulate framework parsing the string too
+  //JSON.parse(issue38json);
+}
+
+function agentFrameworkParse(last) {
+  const issue38 = JSON.parse(issue38json);
+  const rules = last.length ? last[0] : 1;
+  const {ParameterKey, ParameterValue} = lib.constants.InputType;
+  simpleTraverse(issue38, function(path, type, value) {
+    const inputType = type === 'Key' ? ParameterKey : ParameterValue;
+    al.scoreAtom(rules, value, inputType, preferWW);
+  });
+}
+
+function jsonParseOnly(last) {
+  JSON.parse(issue38json);
 }
 
 
@@ -95,18 +137,27 @@ module.exports = {
     n10000: () => 10000,
     n1000000: () => 1000000,
 
+    rules1: () => al.RuleType['path-traversal'],
+    rulesAll: () => 255,
+
     small,
     large,
     open,
-    processNapi,
-    processWasm,
 
-    JStringify,
-    FJStringify,
+    traverse38,
+    simpleTraverse38,
 
-    directFetch,
-    lodashFetch,
-    lodashSplitFetch,
+    strConcat() {
+      ''.concat.apply('', strings);
+    },
+
+    strJoin() {
+      strings.join('');
+    },
+
+    agentLibParse,
+    agentFrameworkParse,
+    jsonParseOnly
   },
   setup(config) {
   },

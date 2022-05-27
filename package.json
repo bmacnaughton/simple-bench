@@ -12,10 +12,12 @@
   "license": "ISC",
   "dependencies": {
     "fast-json-stringify": "^2.7.8",
+    "inquirer": "^8.1.2",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@bmacnaughton/string-generator": "^2.0.0",
+    "@contrast/agent-lib": "^4.1.2",
     "eslint": "^7.32.0"
   }
 }

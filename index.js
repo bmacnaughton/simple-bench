@@ -97,8 +97,8 @@ console.log(`[excluding group times outside ${stddevRange} * stddev]`);
 
 
 const gcTypes = {
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_MAJOR]: 'major',      // 2
   [perf_hooks.constants.NODE_PERFORMANCE_GC_MINOR]: 'minor',      // 1
+  [perf_hooks.constants.NODE_PERFORMANCE_GC_MAJOR]: 'major',      // 2
   [perf_hooks.constants.NODE_PERFORMANCE_GC_INCREMENTAL]: 'incr', // 4
   [perf_hooks.constants.NODE_PERFORMANCE_GC_WEAKCB]: 'weak',      // 8
 };
@@ -116,8 +116,10 @@ const obs = new PerfObserver((list) => {
       verbose && console.log(`perf ${entry.name}: ${entry.duration}`);
       groupTimes.push(entry.duration);
     } else if (entry.entryType === 'gc') {
-      const kind = gcTypes[entry.kind] || entry.kind;
-      verbose && console.log(`perf gc: ${entry.duration} (${kind}) flags: ${entry.flags}`);
+      if (verbose) {
+        const {kind, flags} = entry.detail ? entry.detail : entry;
+        console.log(`perf gc: ${entry.duration} (${gcTypes[kind]}) flags: ${flags}`);
+      }
       gcCounts += 1;
       totalGCTime += entry.duration;
     }
