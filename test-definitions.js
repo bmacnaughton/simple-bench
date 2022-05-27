@@ -1,8 +1,11 @@
 'use strict';
 
 const fs = require('fs');
+
 const lib = require('@contrast/agent-lib');
 const al = new lib.Agent();
+const {Generator} = require('@bmacnaughton/string-generator');
+const gen = new Generator().generate;
 
 const issue38 = require('./issue-38.json');
 const issue38json = fs.readFileSync('./issue-38.json');
@@ -10,8 +13,9 @@ const issue38buffer = Buffer.from(issue38json);
 
 
 const strings = [];
-for (let i = 0; i < 1; i++) {
-  strings.push('a'.repeat(1));
+for (let i = 0; i < 10; i++) {
+  const string = gen('${[A-Za-z0-9 ]<10000>}');
+  strings.push(string);
 }
 
 function small() {
