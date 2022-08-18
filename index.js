@@ -19,7 +19,7 @@ const {
   groupSetup,
   tests,
   final
-} = require('./test-definitions');
+} = require('./benchmark/test-definitions');
 
 if (!tests.noop) {
   tests.noop = async s => s;
@@ -90,14 +90,13 @@ for (const arg of args) {
 config.functionChain = functionNames.slice();
 
 
-console.log(`[executing ${groupCount} groups of ${groupIterations} iterations (${groupWaitMS}ms intergroup pause)]`);
 console.log(`[function chain: ${functionNames.join(', ')}]`);
+console.log(`[${groupIterations} iterations x ${groupCount} groups (${groupWaitMS}ms intergroup pause)]`);
 if (debug) {
   for (const fn of functionChain) {
     console.log(fn.constructor.name);
   }
 }
-console.log(`[excluding group times outside ${stddevRange} * stddev]`);
 
 
 const gcTypes = {
