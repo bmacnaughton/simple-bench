@@ -7,7 +7,7 @@ const al = new lib.Agent();
 const {Generator} = require('@bmacnaughton/string-generator');
 const gen = new Generator().generate;
 
-const issue38 = require('./issue-38.json');
+const issue38 = require('../issue-38.json');
 const issue38json = fs.readFileSync('./issue-38.json');
 const issue38buffer = Buffer.from(issue38json);
 
@@ -119,7 +119,13 @@ function agentFrameworkParse(last) {
 function jsonParseOnly(last) {
   JSON.parse(issue38json);
 }
-
+const array = [2, 4, 6, 8, 10, 12, 14, 16];
+function arrayLength() {
+  return array[array.length - 1];
+}
+function arraySlice() {
+  return array.slice(-1)[0];
+}
 
 module.exports = {
   configure() {
@@ -140,6 +146,9 @@ module.exports = {
     n1000: () => 1000,
     n10000: () => 10000,
     n1000000: () => 1000000,
+
+    arrayLength,
+    arraySlice,
 
     rules1: () => al.RuleType['path-traversal'],
     rulesAll: () => 255,
