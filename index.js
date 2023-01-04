@@ -13,13 +13,14 @@ const perf_hooks = require('perf_hooks');
 const {performance: perf, PerformanceObserver: PerfObserver} = perf_hooks;
 const util = require('util');
 
+const definitions = require('./benchmark/definitions');
 const {
   configure,
   setup,
   groupSetup,
   tests,
   final
-} = require('./benchmark/test-definitions');
+} = definitions;
 
 if (!tests.noop) {
   tests.noop = async s => s;
@@ -46,6 +47,10 @@ const {
   stddevRange,
 } = config;
 
+if (!stddevRange) {
+  console.log('the stddevRange must be a non-zero number:', stddevRange);
+  process.exit(1);
+}
 //
 // this mess of args parsing probably belongs in another module.
 //
@@ -135,8 +140,8 @@ obs.observe({entryTypes: ['measure', 'gc'], buffered: true});
 //
 async function test() {
   // call the tester's setup
-  if (setup) {
-    await (async() => setup(config))();
+  if (definitions.setup) {
+    await (async() => definitions.setup(config))();
   }
   if (groupSetup) {
     await (async() => groupSetup(config))();
@@ -200,6 +205,6 @@ test().then(() => {
   if (final) {
     final(config);
   }
-  summarize(data);
+  summarize(data, { json: false, terse: false });
 });
 
