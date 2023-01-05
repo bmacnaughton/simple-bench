@@ -179,7 +179,7 @@ async function test() {
 // execute functionChains
 //
 async function execute(fc) {
-  let lastResult = [];
+  let lastResult = undefined;
   for (let i = 0; i < fc.length; i++) {
     lastResult = await fc[i](lastResult);
   }
