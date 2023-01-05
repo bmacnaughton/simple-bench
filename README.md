@@ -2,7 +2,7 @@
 
 ## how to use
 
-- create a test-definitions.js file. it should export an object with the key
+- create a benchmark/definitions.js file. it should export an object with the key
 `tests`. `tests` value is an object where each key is a function to be benchmarked.
 - run `node index.js key` to run a benchmark function. `key` is one of the keys
 in the `tests` object that was exported.
@@ -19,7 +19,7 @@ in a function-chain or of the framework itself.
 then it may be necessary to loop within the test function to offset simple-bench's base
 level overhead.
 
-## test-definitions.js in more detail
+## benchmark/definitions.js in more detail
 
 ```js
 module.exports = {
@@ -86,7 +86,7 @@ than an eslint dev-dependency.
 previous versions and will no longer work.
 - `.vscode/launch.json` for debugging in vscode.
 - `t.sh` a dumb script for summarizing results.
-- `test-definitions.js` the test definitions file read by `index.js`. it must be present.
+- `benchmark/definitions.js` the test definitions file read by `index.js`. it must be present.
 
 ## more detail
 
