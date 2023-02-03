@@ -25,8 +25,8 @@ const {
 if (!tests.noop) {
   tests.noop = async s => s;
 }
-if (!tests.noopu) {
-  tests.noopu = async() => undefined;
+if (!tests.noopUndef) {
+  tests.noopUndef = async() => undefined;
 }
 
 const defaultConfig = {
@@ -103,13 +103,24 @@ if (debug) {
   }
 }
 
-
-const gcTypes = {
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_MINOR]: 'minor',      // 1
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_MAJOR]: 'major',      // 2
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_INCREMENTAL]: 'incr', // 4
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_WEAKCB]: 'weak',      // 8
-};
+let gcTypes;
+const k = perf_hooks.constants;
+// major changed from 2 to 4 for some reason.
+if (k.NODE_PERFORMANCE_GC_MAJOR === 4) {
+  gcTypes = {
+    [k.NODE_PERFORMANCE_GC_MAJOR] : 'major',
+    [k.NODE_PERFORMANCE_GC_MINOR] : 'minor',
+    [k.NODE_PERFORMANCE_GC_INCREMENTAL] : 'incr',
+    [k.NODE_PERFORMANCE_GC_WEAKCB] : 'weak',
+  };
+} else {
+  gcTypes = {
+    [k.NODE_PERFORMANCE_GC_MINOR]: 'minor',      // 1
+    [k.NODE_PERFORMANCE_GC_MAJOR]: 'major',      // 2
+    [k.NODE_PERFORMANCE_GC_INCREMENTAL]: 'incr', // 4
+    [k.NODE_PERFORMANCE_GC_WEAKCB]: 'weak',      // 8
+  };
+}
 
 //
 // setup measurements with performance hooks
