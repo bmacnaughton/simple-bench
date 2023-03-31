@@ -1,16 +1,6 @@
 # simple-bench
 
-simple-bench is a toolkit for executing JavaScript benchmarks; it is not a
-product that makes everything super-simple.
-
-simple-bench handles basic benchmarking tasks
-- warmup
-- multiple runs
-- removing statistical outliers
-- collecting timing and garbage-collection data
-- reporting as text or JSON
-
-## how to use - a recipe
+## how to use
 
 - create a benchmark/definitions.js file. it should export an object with the key
 `tests`. `tests` value is an object where each key is a function to be benchmarked.
@@ -83,9 +73,24 @@ module.exports = {
   }
 };
 ```
+
+## repo organization
+
+because each benchmark is specific there are no dependencies at this time other
+than an eslint dev-dependency.
+
+- `index.js` is the main program.
+- `lib/` contains support files.
+- `data/` contains any supporting data. there 3 json-format log files there.
+- `archived-tests/` contains old test-definition files. many were written for
+previous versions and will no longer work.
+- `.vscode/launch.json` for debugging in vscode.
+- `t.sh` a dumb script for summarizing results.
+- `benchmark/definitions.js` the test definitions file read by `index.js`. it must be present.
+
 ## more detail
 
-Execution times reported for each group exclude everything other than executing
+the execution times reported for each group exclude everything other than executing
 the function-chain.
 
 ```js

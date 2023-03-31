@@ -22,11 +22,16 @@ const {
   final
 } = definitions;
 
+// nooo that returns its argument
 if (!tests.noop) {
   tests.noop = async s => s;
 }
+// noop that returns undefined
 if (!tests.noopUndef) {
   tests.noopUndef = async() => undefined;
+}
+if (!tests.noopu) {
+  tests.noopu = async() => undefined;
 }
 
 const defaultConfig = {
