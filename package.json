@@ -16,7 +16,7 @@
   },
   "keywords": [],
   "author": "Bruce A. MacNaughton",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
   },
   "devDependencies": {
