@@ -68,7 +68,7 @@ module.exports = {
     regex,
     lastIxString,
     lastIxBuffer,
-    async timeTest = () => new Promise(resolve => setTimeout(resolve, 10)),
+    timeTest: async () => new Promise(resolve => setTimeout(resolve, 10)),
   },
   // this is called before executing any tests. if the test needs to do any
   // setup based on the execution params it may do so here.

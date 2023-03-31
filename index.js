@@ -1,19 +1,25 @@
 #!/usr/bin/env node
 'use strict';
 
+const path = require('path');
+
 const {summarize} = require('./lib/summarize');
 
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
-// this file executes tests imported from
-// test-definitions.
+// this file executes tests imported from a definitions file.
 
 const perf_hooks = require('perf_hooks');
 const {performance: perf, PerformanceObserver: PerfObserver} = perf_hooks;
 const util = require('util');
 
-const definitions = require('./benchmark/definitions');
+let benchmarkFile = './benchmark/definitions';
+if (process.env.BENCH) {
+  benchmarkFile = path.resolve(process.env.BENCH);
+}
+const definitions = require(benchmarkFile);
+
 const {
   configure,
   setup,
@@ -90,6 +96,10 @@ for (const arg of args) {
   } else if (arg === '-h' || arg === '--help') {
     console.log('simple-bench function-chain');
     console.log('all times reported in milliseconds');
+    console.log('  -m do memcheck too (not usually helpful)');
+    console.log('  -d debug (output the function chain constructor names)');
+    console.log('to use a benchmark file other than ./benchmark/definitions.js:');
+    console.log('$ BENCH=./example.js node index.js smallText expand');
     process.exit(0);
   } else {
     console.log('simple-bench: invalid function-chain function:', arg);

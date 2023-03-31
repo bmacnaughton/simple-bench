@@ -18,7 +18,6 @@
   "author": "Bruce A. MacNaughton",
   "license": "MIT",
   "dependencies": {
-  },
-  "devDependencies": {
+    "eslint": "^8.37.0"
   }
 }
