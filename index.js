@@ -231,6 +231,11 @@ test().then(() => {
   if (final) {
     final(config);
   }
-  summarize(data, { json: false, terse: false });
+
+  // hacky config
+  const terse = !!process.env.TERSE;
+  const json = !!process.env.JSON;
+
+  summarize(data, { json, terse });
 });
 
