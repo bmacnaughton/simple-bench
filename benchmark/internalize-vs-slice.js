@@ -122,7 +122,7 @@ module.exports = {
     for (let i = 0; i < MAX_STRINGS; i++) {
       const str = untracked[i];
       if (!str) {
-        break
+        break;
       }
       if (d.isExternal(str)) {
         trackedCount += 1;
