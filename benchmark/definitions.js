@@ -42,7 +42,7 @@ module.exports = {
   },
   // this is called before executing any tests. if the test needs to do any
   // setup based on the execution params it may do so here.
-  setup(config) {
+  setup(_config) {
     this.bigTextData = 'a'.repeat(1000);
     this.smallTextData = 'b';
 
@@ -50,7 +50,7 @@ module.exports = {
   // this is called before each group (including the warmup) is executed.
   // if a test requires setup for each group (e.g., initializing or clearing
   // an array) it can be done here.
-  groupSetup(config) {
+  groupSetup(_config) {
 
   }
 };

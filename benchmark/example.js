@@ -24,7 +24,7 @@ class StashOla {
 const stash = new Stash('stasholeum');
 const stashola = new StashOla('stasholeum');
 
-function setup(config) {}
+function setup(_config) {}
 
 module.exports = {
   configure() {
@@ -40,7 +40,7 @@ module.exports = {
     };
   },
   setup,
-  groupSetup(config) {
+  groupSetup(_config) {
   },
   tests: {
     '1000'() {
@@ -62,8 +62,8 @@ module.exports = {
       }
     },
   },
-  final() {
+  final(_config) {
     // eslint-disable-next-line no-console
-    //console.log('tracked', trackedCount, 'untracked', untrackedCount);
+    //console.log('check state of tracked objects');
   }
 };

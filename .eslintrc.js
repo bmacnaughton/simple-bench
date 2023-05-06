@@ -11,7 +11,7 @@ module.exports = {
     "mocha": true
   },
   "parserOptions": {
-    "ecmaVersion": 2018,
+    "ecmaVersion": 2021,
     "sourceType": "script"
   },
 
@@ -66,7 +66,7 @@ module.exports = {
     "no-undef": 2,
     //"no-unused-vars": [2, {"args": "after-used"}],
     // don't complain about unused args
-    "no-unused-vars": [2, {"args": "none"}],
+    "no-unused-vars": [2, { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
 
     // Node.js and CommonJS
     // http://eslint.org/docs/rules/#nodejs-and-commonjs
