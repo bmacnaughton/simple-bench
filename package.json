@@ -1,23 +1,24 @@
 {
-  "name": "simple-bench",
+  "name": "@bmacnaughton/simple-bench",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "extract.js",
+    "make-csv.js",
+    "summarize.js",
+    "README.md",
+    "lib/*"
+  ],
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "fast-json-stringify": "^2.7.8",
-    "inquirer": "^8.1.2",
-    "lodash": "^4.17.21"
-  },
+  "author": "Bruce A. MacNaughton",
+  "license": "MIT",
   "devDependencies": {
-    "@bmacnaughton/string-generator": "^2.0.0",
-    "@contrast/agent-lib": "^4.1.2",
-    "eslint": "^7.32.0"
+    "eslint": "^8.40.0"
   }
 }

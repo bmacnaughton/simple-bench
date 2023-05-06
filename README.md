@@ -1,8 +1,18 @@
 # simple-bench
 
-## how to use
+simple-bench is a toolkit for executing JavaScript benchmarks; it is not a
+product that makes everything super-simple.
 
-- create a test-definitions.js file. it should export an object with the key
+simple-bench handles basic benchmarking tasks
+- warmup
+- multiple runs
+- removing statistical outliers
+- collecting timing and garbage-collection data
+- reporting as text or JSON
+
+## how to use - a recipe
+
+- create a benchmark/definitions.js file. it should export an object with the key
 `tests`. `tests` value is an object where each key is a function to be benchmarked.
 - run `node index.js key` to run a benchmark function. `key` is one of the keys
 in the `tests` object that was exported.
@@ -19,7 +29,7 @@ in a function-chain or of the framework itself.
 then it may be necessary to loop within the test function to offset simple-bench's base
 level overhead.
 
-## test-definitions.js in more detail
+## benchmark/definitions.js in more detail
 
 ```js
 module.exports = {
@@ -58,7 +68,7 @@ module.exports = {
     regex,
     lastIxString,
     lastIxBuffer,
-    async timeTest = () => new Promise(resolve => setTimeout(resolve, 10)),
+    timeTest: async () => new Promise(resolve => setTimeout(resolve, 10)),
   },
   // this is called before executing any tests. if the test needs to do any
   // setup based on the execution params it may do so here.
@@ -73,24 +83,9 @@ module.exports = {
   }
 };
 ```
-
-## repo organization
-
-because each benchmark is specific there are no dependencies at this time other
-than an eslint dev-dependency.
-
-- `index.js` is the main program.
-- `lib/` contains support files.
-- `data/` contains any supporting data. there 3 json-format log files there.
-- `archived-tests/` contains old test-definition files. many were written for
-previous versions and will no longer work.
-- `.vscode/launch.json` for debugging in vscode.
-- `t.sh` a dumb script for summarizing results.
-- `test-definitions.js` the test definitions file read by `index.js`. it must be present.
-
 ## more detail
 
-the execution times reported for each group exclude everything other than executing
+Execution times reported for each group exclude everything other than executing
 the function-chain.
 
 ```js

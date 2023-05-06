@@ -1,17 +1,24 @@
 #!/usr/bin/env node
 'use strict';
 
+const path = require('path');
+
 const {summarize} = require('./lib/summarize');
 
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
 
-// this file executes tests imported from
-// test-definitions.
+// this file executes tests imported from a definitions file.
 
 const perf_hooks = require('perf_hooks');
 const {performance: perf, PerformanceObserver: PerfObserver} = perf_hooks;
 const util = require('util');
+
+let benchmarkFile = './benchmark/definitions';
+if (process.env.BENCH) {
+  benchmarkFile = path.resolve(process.env.BENCH);
+}
+const definitions = require(benchmarkFile);
 
 const {
   configure,
@@ -19,10 +26,15 @@ const {
   groupSetup,
   tests,
   final
-} = require('./benchmark/test-definitions');
+} = definitions;
 
+// nooo that returns its argument
 if (!tests.noop) {
   tests.noop = async s => s;
+}
+// noop that returns undefined
+if (!tests.noopUndef) {
+  tests.noopUndef = async() => undefined;
 }
 if (!tests.noopu) {
   tests.noopu = async() => undefined;
@@ -46,6 +58,10 @@ const {
   stddevRange,
 } = config;
 
+if (!stddevRange) {
+  console.log('the stddevRange must be a non-zero number:', stddevRange);
+  process.exit(1);
+}
 //
 // this mess of args parsing probably belongs in another module.
 //
@@ -80,6 +96,10 @@ for (const arg of args) {
   } else if (arg === '-h' || arg === '--help') {
     console.log('simple-bench function-chain');
     console.log('all times reported in milliseconds');
+    console.log('  -m do memcheck too (not usually helpful)');
+    console.log('  -d debug (output the function chain constructor names)');
+    console.log('to use a benchmark file other than ./benchmark/definitions.js:');
+    console.log('$ BENCH=./example.js node index.js smallText expand');
     process.exit(0);
   } else {
     console.log('simple-bench: invalid function-chain function:', arg);
@@ -98,13 +118,24 @@ if (debug) {
   }
 }
 
-
-const gcTypes = {
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_MINOR]: 'minor',      // 1
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_MAJOR]: 'major',      // 2
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_INCREMENTAL]: 'incr', // 4
-  [perf_hooks.constants.NODE_PERFORMANCE_GC_WEAKCB]: 'weak',      // 8
-};
+let gcTypes;
+const k = perf_hooks.constants;
+// major changed from 2 to 4 for some reason.
+if (k.NODE_PERFORMANCE_GC_MAJOR === 4) {
+  gcTypes = {
+    [k.NODE_PERFORMANCE_GC_MAJOR] : 'major',
+    [k.NODE_PERFORMANCE_GC_MINOR] : 'minor',
+    [k.NODE_PERFORMANCE_GC_INCREMENTAL] : 'incr',
+    [k.NODE_PERFORMANCE_GC_WEAKCB] : 'weak',
+  };
+} else {
+  gcTypes = {
+    [k.NODE_PERFORMANCE_GC_MINOR]: 'minor',      // 1
+    [k.NODE_PERFORMANCE_GC_MAJOR]: 'major',      // 2
+    [k.NODE_PERFORMANCE_GC_INCREMENTAL]: 'incr', // 4
+    [k.NODE_PERFORMANCE_GC_WEAKCB]: 'weak',      // 8
+  };
+}
 
 //
 // setup measurements with performance hooks
@@ -135,8 +166,8 @@ obs.observe({entryTypes: ['measure', 'gc'], buffered: true});
 //
 async function test() {
   // call the tester's setup
-  if (setup) {
-    await (async() => setup(config))();
+  if (definitions.setup) {
+    await (async() => definitions.setup(config))();
   }
   if (groupSetup) {
     await (async() => groupSetup(config))();
@@ -174,7 +205,7 @@ async function test() {
 // execute functionChains
 //
 async function execute(fc) {
-  let lastResult = [];
+  let lastResult = undefined;
   for (let i = 0; i < fc.length; i++) {
     lastResult = await fc[i](lastResult);
   }
@@ -200,6 +231,11 @@ test().then(() => {
   if (final) {
     final(config);
   }
-  summarize(data);
+
+  // hacky config
+  const terse = !!process.env.TERSE;
+  const json = !!process.env.JSON;
+
+  summarize(data, { json, terse });
 });
 
