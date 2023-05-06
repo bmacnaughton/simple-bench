@@ -14,6 +14,11 @@ const perf_hooks = require('perf_hooks');
 const {performance: perf, PerformanceObserver: PerfObserver} = perf_hooks;
 const util = require('util');
 
+
+// hacky config
+const terse = !!process.env.TERSE;
+const json = !!process.env.JSON;
+
 let benchmarkFile = './benchmark/definitions';
 if (process.env.BENCH) {
   benchmarkFile = path.resolve(process.env.BENCH);
@@ -109,13 +114,21 @@ for (const arg of args) {
 }
 config.functionChain = functionNames.slice();
 
-
-console.log(`[function chain: ${functionNames.join(', ')}]`);
-console.log(`[${groupIterations} iterations x ${groupCount} groups (${groupWaitMS}ms intergroup pause)]`);
-if (debug) {
-  for (const fn of functionChain) {
-    console.log(fn.constructor.name);
+if (!json) {
+  console.log(`[function chain: ${functionNames.join(', ')}]`);
+  console.log(`[${groupIterations} iterations x ${groupCount} groups (${groupWaitMS}ms intergroup pause)]`);
+  if (debug) {
+    for (const fn of functionChain) {
+      console.log(fn.constructor.name);
+    }
   }
+} else {
+  console.log(JSON.stringify({
+    functionChain: functionNames,
+    groupIterations,
+    groupCount,
+    groupWaitMS,
+  }));
 }
 
 let gcTypes;
@@ -231,10 +244,6 @@ test().then(() => {
   if (final) {
     final(config);
   }
-
-  // hacky config
-  const terse = !!process.env.TERSE;
-  const json = !!process.env.JSON;
 
   summarize(data, { json, terse });
 });
