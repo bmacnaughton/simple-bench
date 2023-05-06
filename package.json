@@ -8,7 +8,8 @@
     "extract.js",
     "make-csv.js",
     "summarize.js",
-    "README.md"
+    "README.md",
+    "lib/*"
   ],
   "scripts": {
     "start": "node index.js",
@@ -17,7 +18,7 @@
   "keywords": [],
   "author": "Bruce A. MacNaughton",
   "license": "MIT",
-  "dependencies": {
-    "eslint": "^8.37.0"
+  "devDependencies": {
+    "eslint": "^8.40.0"
   }
 }
