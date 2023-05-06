@@ -1,21 +1,19 @@
 {
   "name": "@bmacnaughton/simple-bench",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "benchmarking runner for node.js",
   "main": "index.js",
   "files": [
     "index.js",
-    "extract.js",
-    "make-csv.js",
-    "summarize.js",
     "README.md",
-    "lib/*"
+    "lib/*",
+    "benchmark/definitions.js"
   ],
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["benchmark", "node.js", "benchmarking", "benchmarking runner", "tool"],
   "author": "Bruce A. MacNaughton",
   "license": "MIT",
   "devDependencies": {
