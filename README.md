@@ -18,7 +18,7 @@ simple-bench handles basic benchmarking tasks
 in the `tests` object that was exported.
 - function-chains: if the test functions are structured to take an argument then
 multiple functions can be given on the command line and their executions are
-chained, e.g., ` node index.js func1 func2`. in this example `func2` will be passed
+chained, e.g., `node index.js func1 func2`. in this example `func2` will be passed
 the return value of `func1`. this enables trying many different combinations without
 having to hardcode a function for each.
 - the function chain allows async functions; you can also just return a promise but it
@@ -28,6 +28,18 @@ in a function-chain or of the framework itself.
 - if the work done by the function is very small relative to the work done by simple-bench,
 then it may be necessary to loop within the test function to offset simple-bench's base
 level overhead.
+
+## options
+
+Command line options:
+- -d debug - additional details written to stdout
+- -m capture memory usage stats too (not typically useful)
+
+Environment variable options:
+- BENCH - use this value for benchmark file (default is benchmark/definitions.js)
+- JSON - set to any non-empty value - output as JSON, not text
+- TERSE - set to any non-empty value - minimal text output (ignored if JSON specified)
+
 
 ## benchmark/definitions.js in more detail
 
@@ -101,4 +113,9 @@ program initialization. it's not clear (to me anyway) how to identify which garb
 collections are associated with the code being benchmarked and which are not. the
 best way to get a handle on the baseline garbage collections is to use the `noop`
 built-in function as a baseline for comparison.
+
+## todo
+
+- update make-csv, pipe-extract, and pipe-make-csv
+- clean up detritus
 

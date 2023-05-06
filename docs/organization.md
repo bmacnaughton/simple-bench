@@ -85,8 +85,9 @@ than an eslint dev-dependency.
 - `archived-tests/` contains old test-definition files. many were written for
 previous versions and will no longer work.
 - `.vscode/launch.json` for debugging in vscode.
-- `t.sh` a dumb script for summarizing results.
-- `benchmark/definitions.js` the test definitions file read by `index.js`. it must be present.
+- `simple-bench.sh` a simple script for generating a range of results.
+- `benchmark/definitions.js` the test definitions file read by `index.js`. if not present
+an alternate file must be specified using the `BENCH` env var.
 
 ## more detail
 
@@ -105,5 +106,5 @@ the garbage collection counts and times include everything after the requires an
 program initialization. it's not clear (to me anyway) how to identify which garbage
 collections are associated with the code being benchmarked and which are not. the
 best way to get a handle on the baseline garbage collections is to use the `noop`
-built-in function as a baseline for comparison.
+and/or `noopUndefined` built-in functions as a baseline for comparison.
 

@@ -105,6 +105,11 @@ for (const arg of args) {
     console.log('  -d debug (output the function chain constructor names)');
     console.log('to use a benchmark file other than ./benchmark/definitions.js:');
     console.log('$ BENCH=./example.js node index.js smallText expand');
+    console.log('to output json instead of text:');
+    console.log('$ JSON=1 node index.js smallText expand');
+    console.log('to output terse text instead of verbose text:');
+    console.log('$ TERSE=1 node index.js smallText expand');
+    console.log('JSON and TERSE accept any non-empty value');
     process.exit(0);
   } else {
     console.log('simple-bench: invalid function-chain function:', arg);
