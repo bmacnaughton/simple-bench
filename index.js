@@ -33,7 +33,7 @@ const {
   final
 } = definitions;
 
-// nooo that returns its argument
+// noop that returns its argument.
 if (!tests.noop) {
   tests.noop = async s => s;
 }
@@ -213,7 +213,7 @@ async function test() {
     await pause(groupWaitMS);
   }
 
-  // final pause
+  // final pause - wait extra time to let GC finish.
   await pause(groupWaitMS * 10);
   return pause(groupWaitMS);
 }
