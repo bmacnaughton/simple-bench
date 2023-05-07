@@ -8,7 +8,7 @@
     "README.md",
     "lib/summarize.js",
     "benchmark/definitions.js",
-    "data/giantfile.log",
+    "data/bigfile.log",
     "data/tinyfile.log"
   ],
   "scripts": {
