@@ -176,5 +176,3 @@ built-in function as a baseline for comparison.
 ## todo
 
 - update make-csv, pipe-extract, and pipe-make-csv
-- clean up detritus
-
