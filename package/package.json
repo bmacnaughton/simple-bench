@@ -6,10 +6,8 @@
   "files": [
     "index.js",
     "README.md",
-    "lib/summarize.js",
-    "benchmark/definitions.js",
-    "data/giantfile.log",
-    "data/tinyfile.log"
+    "lib/*",
+    "benchmark/definitions.js"
   ],
   "scripts": {
     "start": "node index.js",
