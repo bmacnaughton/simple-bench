@@ -1,7 +1,10 @@
 # simple-bench
 
 simple-bench is a toolkit for executing JavaScript benchmarks; it is not a
-product that makes everything super-simple.
+product that makes everything super-simple. It's been my experience that
+benchmarking requires thought and is rarely super-simple. So simple-bench
+tries to handle the basics and make it relatively easy to manipulate common
+settings.
 
 simple-bench handles basic benchmarking tasks
 - warmup
@@ -17,7 +20,8 @@ as a dependency. Keep reading.
 
 - create a directory for building your benchmark (or make a subdirectory in an existing
 project).
-- fetch the simple-bench package from npm using `npm pack @bmacnaughton/simple-bench`
+- fetch the simple-bench package from npm using `npm pack @bmacnaughton/simple-bench` and
+extract it where you want to work with it.
 - using `benchmarks/definitions.js` as an example, create your own benchmarks/definitions.js
 file. it should export an object with the key `tests`. `tests` value is an object where
 each key is a function to be benchmarked.
@@ -45,8 +49,103 @@ Command line options:
 Environment variable options:
 - BENCH - use this value for benchmark file (default is benchmark/definitions.js)
 - JSON - set to any non-empty value - output as JSON, not text
-- TERSE - set to any non-empty value - minimal text output (ignored if JSON specified)
+- TERSE - set to any non-empty value - only show clean data (ignored if JSON specified)
 
+## JSON output
+
+Two lines per benchmark are output. The first is a short summary of what is being run;
+its primary purpose is visual feedback. The second is the benchmark results; it includes
+all the information from the summary as well as the following:
+
+- garbage collection stats
+- group stats
+  - the time group's execution
+  - the mean of the group run times
+  - the standard deviation of the group run times
+  - and the mean per iteration (mean divided by group iterations)
+- outliers (groups falling more than the specified standard deviation range from
+the mean. this can be set in the benchmark definitions config.)
+  - each outlier group's time
+- clean (only groups falling within the specified standard deviation range)
+  - the times for each group's execution
+  - the mean of the group run times
+  - the standard deviation of the group run times
+  - the low cutoff value
+  - the high cutoff value
+
+Example:
+```json
+{
+  "params": {
+    "functionChain": ["tinyText", "split"],
+    "warmupIterations": 10,
+    "groupIterations": 100,
+    "groupCount": 5,
+    "groupWaitMS": 100,
+    "stddevRange": 2
+  },
+  "gc": {
+    "count": 2,
+    "time": 2.8927321434020996
+  },
+  "raw": {
+    "times": [
+      1.8154609203338623,
+      2.7900259494781494,
+      0.5000760555267334,
+      0.9043412208557129,
+      0.5999069213867188
+    ],
+    "mean": 1.3219622135162354,
+    "meanPerIteration": 0.013219622135162354,
+    "stddev": 0.8683340488055122
+  },
+  "clean": {
+    "times": [
+      1.8154609203338623,
+      2.7900259494781494,
+      0.5000760555267334,
+      0.9043412208557129,
+      0.5999069213867188
+    ],
+    "lowRange": 0,
+    "highRange": 3.05863031112726,
+    "mean": 1.3219622135162354,
+    "meanPerIteration": 0.013219622135162354,
+    "stddev": 0.8683340488055122
+  },
+  "outliers": {
+    "times": []
+  }
+}
+```
+
+## text output
+
+Text output is intended for reading.
+
+Example:
+```bash
+[function chain: tinyText, split]
+[100 iterations x 5 groups (100ms intergroup pause)]
+[gc count: 2, gc time: 4.031]
+[group times: 1.87, 3.97, 0.87, 0.87, 0.56]
+[raw group mean 1.629 stddev 1.252 (0.016 per iteration)]
+[all group times within 0.00 to 4.13 (1.629 +/- 2 * 1.252)]
+[mean: 0.01629 per iteration]
+```
+
+If there are outliers, the output is a little different:
+```bash
+[function chain: bigText, split]
+[100 iterations x 5 groups (100ms intergroup pause)]
+[gc count: 22, gc time: 7.594]
+[group times: 6.17, 5.26, 4.48, 3.74, 3.83]
+[raw group mean 4.699 stddev 0.917 (0.047 per iteration)]
+[excluding times outside 4.699 +/- 0.92: 6.17, 3.74]
+  [clean group mean 4.526 (0.045 per iteration) stddev 0.585]
+[mean: 0.04526 per iteration]
+```
 
 ## benchmark/definitions.js in more detail
 
@@ -121,7 +220,7 @@ $ ./simple-bench.sh definitions
 
 From the output, it can be seen that the `lastIxString` approach is fastest.
 
-## more detail
+## more detail (the code)
 
 Execution times reported for each group exclude everything other than executing
 the function-chain. The code:
@@ -174,7 +273,7 @@ async function execute(fc) {
 }
 ```
 
-the garbage collection counts and times include everything after the requires and
+The garbage collection counts and times include everything after the requires and
 program initialization. it's not clear (to me anyway) how to identify which garbage
 collections are associated with the code being benchmarked and which are not. the
 best way to get a handle on the baseline garbage collections is to use the `noop`
@@ -187,3 +286,7 @@ built-in function as a baseline for comparison.
 - TERSE
 - release scripts
 - add CI testing
+- add time/sample-based observations (ala criterion)
+- add timestamp and definitions file name to JSON output
+- add user tag facility
+- allow config to be set outside of definitions file
