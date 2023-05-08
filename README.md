@@ -10,10 +10,17 @@ simple-bench handles basic benchmarking tasks
 - collecting timing and garbage-collection data
 - reporting as text or JSON
 
+While it is an npm package, it's not particularly convenient to install it
+as a dependency. Keep reading.
+
 ## how to use - a recipe
 
-- create a benchmark/definitions.js file. it should export an object with the key
-`tests`. `tests` value is an object where each key is a function to be benchmarked.
+- create a directory for building your benchmark (or make a subdirectory in an existing
+project).
+- fetch the simple-bench package from npm using `npm pack @bmacnaughton/simple-bench`
+- using `benchmarks/definitions.js` as an example, create your own benchmarks/definitions.js
+file. it should export an object with the key `tests`. `tests` value is an object where
+each key is a function to be benchmarked.
 - run `node index.js key` to run a benchmark function. `key` is one of the keys
 in the `tests` object that was exported.
 - function-chains: if the test functions are structured to take an argument then
@@ -117,7 +124,7 @@ From the output, it can be seen that the `lastIxString` approach is fastest.
 ## more detail
 
 Execution times reported for each group exclude everything other than executing
-the function-chain.
+the function-chain. The code:
 
 ```js
 async function test() {
@@ -176,3 +183,7 @@ built-in function as a baseline for comparison.
 ## todo
 
 - update make-csv, pipe-extract, and pipe-make-csv
+- flesh out testing: verify stats, different stddev ranges, ...
+- TERSE
+- release scripts
+- add CI testing

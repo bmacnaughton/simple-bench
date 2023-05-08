@@ -19,7 +19,7 @@ const util = require('util');
 const terse = !!process.env.TERSE;
 const json = !!process.env.JSON;
 
-let benchmarkFile = './benchmark/definitions';
+let benchmarkFile = './benchmarks/definitions';
 if (process.env.BENCH) {
   benchmarkFile = path.resolve(process.env.BENCH);
 }
