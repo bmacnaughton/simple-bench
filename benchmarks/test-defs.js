@@ -14,10 +14,10 @@ module.exports = {
     // this can override the defaults (shown below) in index.js. they are
     // all pretty much what they sound like; see the code for more details.
     return {
-      warmupIterations: 100,    // function chain executions to startup.
-      groupIterations: 1000,  // function chain executions per group
+      warmupIterations: 10,    // function chain executions to startup.
+      groupIterations: 100,  // function chain executions per group
       groupCount: 5,           // groups to execute
-      groupWaitMS: 500,        // ms to wait between groups
+      groupWaitMS: 100,        // ms to wait between groups
       stddevRange: 2,           // beyond this many stddevs, group times are outliers
     };
   },
