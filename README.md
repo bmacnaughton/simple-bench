@@ -283,10 +283,12 @@ built-in function as a baseline for comparison.
 
 - update make-csv, pipe-extract, and pipe-make-csv
 - flesh out testing: verify stats, different stddev ranges, ...
-- TERSE
+- TERSE, with JSON don't output visual feedback line
 - release scripts
 - add CI testing
 - add time/sample-based observations (ala criterion)
-- add timestamp and definitions file name to JSON output
+- add timestamp, elapsed time, and definitions file name to JSON output
 - add user tag facility
 - allow config to be set outside of definitions file
+- make cli/executable version
+- provide some base-level time/cost estimates (show noop/noopu in action)
