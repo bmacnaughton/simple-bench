@@ -15,10 +15,18 @@
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["benchmark", "node.js", "benchmarking", "benchmarking runner", "tool"],
+  "keywords": [
+    "benchmark",
+    "node.js",
+    "benchmarking",
+    "benchmarking runner",
+    "tool"
+  ],
   "author": "Bruce A. MacNaughton",
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^8.40.0"
+    "chai": "^4.3.7",
+    "eslint": "^8.40.0",
+    "mocha": "^10.2.0"
   }
 }
