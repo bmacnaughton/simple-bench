@@ -186,3 +186,4 @@ built-in function as a baseline for comparison.
 - flesh out testing: verify stats, different stddev ranges, ...
 - TERSE
 - release scripts
+- add CI testing
