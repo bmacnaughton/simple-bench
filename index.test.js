@@ -251,7 +251,8 @@ function makeExpectedPatterns(options) {
     /\[raw group mean \d+\.\d+ stddev \d+\.\d+ \(\d+\.\d+ per iteration\)\]/,
     {
       or: new Map([
-        // this will only catch integer stddevs or stddevs with one decimal place
+        // this will only match integer stddevs or stddevs with one decimal place
+        //                                                               v
         [/\[all group times within \d+\.\d+ to \d+\.\d+ \(\d+\.\d+ \+\/- \d(\.\d)? \* \d+\.\d+\)\]/, []],
         [/\[excluding times outside 63.067 \+\/- \d+\.\d+: \d+\.\d+\]/, [
           /\[clean group mean \d+\.\d+ \(\d+\.\d+ per iteration\) stddev \d+\.\d+\]/
