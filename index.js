@@ -44,6 +44,13 @@ if (!tests.noopUndef) {
 if (!tests.noopu) {
   tests.noopu = async() => undefined;
 }
+if (!tests.debug) {
+  tests.debug = async s => {
+    // eslint-disable-next-line no-debugger
+    debugger;
+    return s;
+  }
+}
 
 const defaultConfig = {
   warmupIterations: 100,
