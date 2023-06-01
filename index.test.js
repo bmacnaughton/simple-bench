@@ -140,15 +140,100 @@ describe('simple-bench', function() {
 
     });
   });
+
+  describe('env vars should override benchmark settings', function() {
+    it('for text output', function() {
+      const envOverrides = {
+        WARMUP_ITERATIONS: 2,
+        GROUP_ITERATIONS: 5,
+        GROUP_COUNT: 3,
+        GROUP_WAIT_MS: 50,
+        STDDEV_RANGE: 1.5,
+      };
+      // now convert to expected form
+      const overrides = {};
+      for (const k of Object.keys(envOverrides)) {
+        overrides[envToProperty(k)] = envOverrides[k];
+      }
+      const options = {
+        env: Object.assign({}, process.env, {
+          BENCH: './benchmarks/test-defs.js',
+        }, envOverrides)
+      };
+      const cmd = 'node index.js tinyText split';
+
+      const p = new Promise((resolve, reject) => {
+        cp.exec(cmd, options, (err, stdout, stderr) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ stdout, stderr });
+          }
+        });
+      });
+
+      return p.then(({ stdout, stderr }) => {
+        if (stderr) {
+          // eslint-disable-next-line no-console
+          console.log('STDERR:', stderr);
+        }
+        checkText(stdout.split('\n'), makeExpectedPatterns(overrides));
+      });
+    });
+
+    it('for json output', function() {
+      const expected = {
+        functionChain: ['tinyText', 'split'],
+        warmupIterations: 2,
+        groupIterations: 5,
+        groupCount: 3,
+        groupWaitMS: 50,
+        stddevRange: 1.5,
+      };
+      const options = {
+        env: Object.assign({}, process.env, {
+          BENCH: './benchmarks/test-defs.js',
+          JSON: true,
+          WARMUP_ITERATIONS: expected.warmupIterations,
+          GROUP_ITERATIONS: expected.groupIterations,
+          GROUP_COUNT: expected.groupCount,
+          GROUP_WAIT_MS: expected.groupWaitMS,
+          STDDEV_RANGE: expected.stddevRange,
+        })
+      };
+
+      const cmd = 'node index.js tinyText split';
+
+      const p = new Promise((resolve, reject) => {
+        cp.exec(cmd, options, (err, stdout, stderr) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve({ stdout, stderr });
+          }
+        });
+      });
+
+      return p.then(({ stdout, stderr }) => {
+        if (stderr) {
+          // eslint-disable-next-line no-console
+          console.log('STDERR:', stderr);
+        }
+        checkJson(stdout.split('\n'), expected);
+      });
+
+    });
+  });
 });
 
+// used for testing text output
 function makeExpectedPatterns(options) {
   const defaultOptions = {
     functionChain: ['tinyText', 'split'],
     groupIterations: 100,
     groupCount: 5,
     groupWaitMS: 100,
-  }
+  };
   const {
     functionChain,
     groupIterations: groupIt,
@@ -161,11 +246,13 @@ function makeExpectedPatterns(options) {
     `[function chain: ${functionChain.join(', ')}]`,
     `[${groupIt} iterations x ${groupCount} groups (${groupWait}ms intergroup pause)]`,
     /\[gc count: \d+, gc time: \d+\.\d+\]/,
-    /\[group times: (\d+\.\d+, ){4}\d+\.\d+\]/,
+    ///\[group times: (\d+\.\d+, ){4}\d+\.\d+\]/,
+    new RegExp(`\\[group times: (\\d+\\.\\d+, ){${groupCount - 1}}\\d+\\.\\d+\\]`),
     /\[raw group mean \d+\.\d+ stddev \d+\.\d+ \(\d+\.\d+ per iteration\)\]/,
     {
       or: new Map([
-        [/\[all group times within \d+\.\d+ to \d+\.\d+ \(\d+\.\d+ \+\/- \d \* \d+\.\d+\)\]/, []],
+        // this will only catch integer stddevs or stddevs with one decimal place
+        [/\[all group times within \d+\.\d+ to \d+\.\d+ \(\d+\.\d+ \+\/- \d(\.\d)? \* \d+\.\d+\)\]/, []],
         [/\[excluding times outside 63.067 \+\/- \d+\.\d+: \d+\.\d+\]/, [
           /\[clean group mean \d+\.\d+ \(\d+\.\d+ per iteration\) stddev \d+\.\d+\]/
         ]]
@@ -258,4 +345,13 @@ function checkJson(lines, expected) {
   expect(o2.clean.mean).a('number');
   expect(o2.clean.meanPerIteration).a('number');
   expect(o2.clean.stddev).a('number');
+}
+
+function envToProperty(name) {
+  let lc = name.toLowerCase();
+  lc = lc.replace(/([a-z])_([a-z])/g, (m, p1, p2) => `${p1}${p2.toUpperCase()}`);
+  if (lc === 'groupWaitMs') {
+    lc = 'groupWaitMS';
+  }
+  return lc;
 }

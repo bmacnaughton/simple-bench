@@ -53,8 +53,36 @@ const defaultConfig = {
   stddevRange: 2,
 };
 
+const propToEnvMap = {
+  warmupIterations: 'WARMUP_ITERATIONS',
+  groupIterations: 'GROUP_ITERATIONS',
+  groupCount: 'GROUP_COUNT',
+  groupWaitMS: 'GROUP_WAIT_MS',
+  //stddevRange: 'STDDEV_RANGE',
+};
+
+const overrideConfig = {};
+
+for (const key in defaultConfig) {
+  const envKey = propToEnvMap[key];
+  if (envKey in process.env) {
+    const value = process.env[envKey];
+    if (!/^\+?\d+$/.test(value)) {
+      throw new Error(`env var ${envKey} must be a positive integerm not ${value}`);
+    }
+    overrideConfig[key] = +process.env[envKey];
+  }
+}
+if ('STDDEV_RANGE' in process.env) {
+  const value = parseFloat(process.env.STDDEV_RANGE);
+  if (isNaN(value) || value <= 0) {
+    throw new Error(`env var STDDEV_RANGE must be a positive number, not ${process.env.STDDEV_RANGE}`);
+  }
+  overrideConfig.stddevRange = value;
+}
+
 const userConfig = configure ? configure() : {};
-const config = Object.assign({}, defaultConfig, userConfig);
+const config = Object.assign({}, defaultConfig, userConfig, overrideConfig);
 const {
   warmupIterations,
   groupIterations,
