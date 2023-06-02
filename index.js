@@ -44,6 +44,13 @@ if (!tests.noopUndef) {
 if (!tests.noopu) {
   tests.noopu = async() => undefined;
 }
+if (!tests.debug) {
+  tests.debug = async s => {
+    // eslint-disable-next-line no-debugger
+    debugger;
+    return s;
+  };
+}
 
 const defaultConfig = {
   warmupIterations: 100,
@@ -53,8 +60,37 @@ const defaultConfig = {
   stddevRange: 2,
 };
 
+const propToEnvMap = {
+  warmupIterations: 'WARMUP_ITERATIONS',
+  groupIterations: 'GROUP_ITERATIONS',
+  groupCount: 'GROUP_COUNT',
+  groupWaitMS: 'GROUP_WAIT_MS',
+  // handle STDDEV_RANGE specially because it can be a float
+  //stddevRange: 'STDDEV_RANGE',
+};
+
+const overrideConfig = {};
+
+for (const key in defaultConfig) {
+  const envKey = propToEnvMap[key];
+  if (envKey in process.env) {
+    const value = process.env[envKey];
+    if (!/^\+?\d+$/.test(value)) {
+      throw new Error(`env var ${envKey} must be a positive integerm not ${value}`);
+    }
+    overrideConfig[key] = +process.env[envKey];
+  }
+}
+if ('STDDEV_RANGE' in process.env) {
+  const value = parseFloat(process.env.STDDEV_RANGE);
+  if (isNaN(value) || value <= 0) {
+    throw new Error(`env var STDDEV_RANGE must be a positive number, not ${process.env.STDDEV_RANGE}`);
+  }
+  overrideConfig.stddevRange = value;
+}
+
 const userConfig = configure ? configure() : {};
-const config = Object.assign({}, defaultConfig, userConfig);
+const config = Object.assign({}, defaultConfig, userConfig, overrideConfig);
 const {
   warmupIterations,
   groupIterations,
@@ -121,7 +157,7 @@ config.functionChain = functionNames.slice();
 
 if (!json) {
   console.log(`[function chain: ${functionNames.join(', ')}]`);
-  console.log(`[${groupIterations} iterations x ${groupCount} groups (${groupWaitMS}ms intergroup pause)]`);
+  console.log(`[${groupIterations} iterations x ${groupCount} groups (${groupWaitMS}ms intergroup pause) stddevRange ${stddevRange}]`);
   if (debug) {
     for (const fn of functionChain) {
       console.log(fn.constructor.name);
