@@ -1,8 +1,6 @@
 #!/usr/bin/env node
 'use strict';
 
-// innocuous comment
-
 const path = require('path');
 
 const {summarize} = require('./lib/summarize');
