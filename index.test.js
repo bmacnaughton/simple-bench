@@ -10,7 +10,7 @@ describe('simple-bench', function() {
     it('should pass when all results in stddev range', function() {
       const lines = [
         '[function chain: tinyText, split]',
-        '[1000 iterations x 5 groups (500ms intergroup pause)]',
+        '[1000 iterations x 5 groups (500ms intergroup pause) stddevRange 2]',
         '[gc count: 14, gc time: 5.246]',
         '[group times: 5.46, 3.15, 4.52, 5.40, 4.84]',
         '[raw group mean 4.673 stddev 0.840 (0.005 per iteration)]',
@@ -26,7 +26,7 @@ describe('simple-bench', function() {
     it('should pass when some results are outliers', function() {
       const lines = [
         '[function chain: tinyText, split]',
-        '[1000 iterations x 5 groups (500ms intergroup pause)]',
+        '[1000 iterations x 5 groups (500ms intergroup pause) stddevRange 2]',
         '[gc count: 969, gc time: 77.905]',
         '[group times: 68.19, 64.92, 63.26, 61.92, 62.97]',
         '[raw group mean 63.067 stddev 3.191 (0.001 per iteration)]',
@@ -233,18 +233,20 @@ function makeExpectedPatterns(options) {
     groupIterations: 100,
     groupCount: 5,
     groupWaitMS: 100,
+    stddevRange: 2,
   };
   const {
     functionChain,
     groupIterations: groupIt,
     groupCount,
-    groupWaitMS: groupWait
+    groupWaitMS: groupWait,
+    stddevRange,
   } = Object.assign({}, defaultOptions, options);
 
 
   return [
     `[function chain: ${functionChain.join(', ')}]`,
-    `[${groupIt} iterations x ${groupCount} groups (${groupWait}ms intergroup pause)]`,
+    `[${groupIt} iterations x ${groupCount} groups (${groupWait}ms intergroup pause) stddevRange ${stddevRange}]`,
     /\[gc count: \d+, gc time: \d+\.\d+\]/,
     ///\[group times: (\d+\.\d+, ){4}\d+\.\d+\]/,
     new RegExp(`\\[group times: (\\d+\\.\\d+, ){${groupCount - 1}}\\d+\\.\\d+\\]`),

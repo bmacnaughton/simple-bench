@@ -49,7 +49,7 @@ if (!tests.debug) {
     // eslint-disable-next-line no-debugger
     debugger;
     return s;
-  }
+  };
 }
 
 const defaultConfig = {
@@ -65,6 +65,7 @@ const propToEnvMap = {
   groupIterations: 'GROUP_ITERATIONS',
   groupCount: 'GROUP_COUNT',
   groupWaitMS: 'GROUP_WAIT_MS',
+  // handle STDDEV_RANGE specially because it can be a float
   //stddevRange: 'STDDEV_RANGE',
 };
 
@@ -156,7 +157,7 @@ config.functionChain = functionNames.slice();
 
 if (!json) {
   console.log(`[function chain: ${functionNames.join(', ')}]`);
-  console.log(`[${groupIterations} iterations x ${groupCount} groups (${groupWaitMS}ms intergroup pause)]`);
+  console.log(`[${groupIterations} iterations x ${groupCount} groups (${groupWaitMS}ms intergroup pause) stddevRange ${stddevRange}]`);
   if (debug) {
     for (const fn of functionChain) {
       console.log(fn.constructor.name);
