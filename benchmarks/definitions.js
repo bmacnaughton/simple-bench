@@ -77,5 +77,10 @@ module.exports = {
   // an array) it can be done here.
   groupSetup(_config) {
 
-  }
+  },
+  // this is called at the end of the benchmark. it can be used to clean up,
+  // verify that actions were performed, etc.
+  final(_config) {
+
+  },
 };
