@@ -257,7 +257,7 @@ async function test() {
     }
     perf.measure('iteration-time', 'start-iteration');
     if (memory) {
-      memory[i] = process.memoryUsage();
+      mem[i] = process.memoryUsage();
     }
     await pause(groupWaitMS);
   }
