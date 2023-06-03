@@ -5,6 +5,7 @@ const path = require('path');
 
 const { summarize } = require('./lib/summarize');
 const makeBenchmark = require('./lib/make-benchmark');
+const getRunSettings = require('./lib/get-run-settings');
 
 /* eslint-disable no-console */
 /* eslint-disable no-unused-vars */
@@ -12,11 +13,6 @@ const makeBenchmark = require('./lib/make-benchmark');
 // this file executes tests imported from a definitions file.
 
 const util = require('util');
-
-
-// hacky config
-const terse = !!process.env.TERSE;
-const json = !!process.env.JSON;
 
 let benchmarkFile = './benchmarks/definitions';
 if (process.env.BENCH) {
@@ -69,92 +65,107 @@ const propToEnvMap = {
   //stddevRange: 'STDDEV_RANGE',
 };
 
-const overrideConfig = {};
+const benchmarkDefaultConfig = configure ? configure() : {};
 
-for (const key in defaultConfig) {
-  const envKey = propToEnvMap[key];
-  if (envKey in process.env) {
-    const value = process.env[envKey];
-    if (!/^\+?\d+$/.test(value)) {
-      throw new Error(`env var ${envKey} must be a positive integerm not ${value}`);
-    }
-    overrideConfig[key] = +process.env[envKey];
-  }
-}
-if ('STDDEV_RANGE' in process.env) {
-  const value = parseFloat(process.env.STDDEV_RANGE);
-  if (isNaN(value) || value <= 0) {
-    throw new Error(`env var STDDEV_RANGE must be a positive number, not ${process.env.STDDEV_RANGE}`);
-  }
-  overrideConfig.stddevRange = value;
-}
+const { config, runSettings } = getRunSettings(benchmarkDefaultConfig, tests);
 
-const userConfig = configure ? configure() : {};
-const config = Object.assign({}, defaultConfig, userConfig, overrideConfig);
+// const overrideConfig = {};
+//
+// for (const key in defaultConfig) {
+  // const envKey = propToEnvMap[key];
+  // if (envKey in process.env) {
+    // const value = process.env[envKey];
+    // if (!/^\+?\d+$/.test(value)) {
+      // throw new Error(`env var ${envKey} must be a positive integer, not ${value}`);
+    // }
+    // overrideConfig[key] = +process.env[envKey];
+  // }
+// }
+// if ('STDDEV_RANGE' in process.env) {
+  // const value = parseFloat(process.env.STDDEV_RANGE);
+  // if (isNaN(value) || value <= 0) {
+    // throw new Error(`env var STDDEV_RANGE must be a positive number, not ${process.env.STDDEV_RANGE}`);
+  // }
+  // overrideConfig.stddevRange = value;
+// }
+//
+// const userConfig = configure ? configure() : {};
+// const config = Object.assign({}, defaultConfig, userConfig, overrideConfig);
+// const {
+  // warmupIterations,
+  // groupIterations,
+  // groupCount,
+  // groupWaitMS,
+  // stddevRange,
+// } = config;
+//
+// if (!stddevRange || stddevRange <= 0 || typeof stddevRange !== 'number') {
+  // console.log('the stddevRange must be a positive number:', stddevRange);
+  // process.exit(1);
+// }
+
+////this mess of args parsing probably belongs in another module.
+
+// let memCheck = false;
+// let debug = false;
+// const functionNames = [];
+////take from env?
+// let args = process.argv.slice(2);
+////this little trick is to deal with vscode's debugger "prompt"
+// if (args.length === 1 && args[0].includes(',')) {
+  // args = args[0].split(',');
+// }
+// const functionChain = [];
+// for (const arg of args) {
+  // if (arg in tests) {
+    ////a test can be a sequence of tests. that requires looping
+    ////on process.argv and adding tests to functionChain.
+    // if (tests[arg].constructor.name === 'AsyncFunction') {
+      // functionChain.push(tests[arg]);
+    // } else {
+      // functionChain.push(async x => tests[arg](x));
+    // }
+    // functionNames.push(arg);
+  // } else if (arg === '-m') {
+    // memCheck = true;
+  // } else if (arg === '-d') {
+    // debug = true;
+  // } else if (arg === '-h' || arg === '--help') {
+    // console.log('simple-bench function-chain');
+    // console.log('all times reported in milliseconds');
+    // console.log('  -m do memcheck too (not usually helpful)');
+    // console.log('  -d debug (output the function chain constructor names)');
+    // console.log('to use a benchmark file other than ./benchmark/definitions.js:');
+    // console.log('$ BENCH=./example.js node index.js smallText expand');
+    // console.log('to output json instead of text:');
+    // console.log('$ JSON=1 node index.js smallText expand');
+    // console.log('to output terse text instead of verbose text:');
+    // console.log('$ TERSE=1 node index.js smallText expand');
+    // console.log('JSON and TERSE accept any non-empty value');
+    // process.exit(0);
+  // } else {
+    // console.log('simple-bench: invalid function-chain function:', arg);
+    ////eslint-disable-next-line
+    // process.exit(1);
+  // }
+// }
+
 const {
-  warmupIterations,
-  groupIterations,
   groupCount,
+  groupIterations,
   groupWaitMS,
   stddevRange,
 } = config;
 
-if (!stddevRange || stddevRange <= 0 || typeof stddevRange !== 'number') {
-  console.log('the stddevRange must be a positive number:', stddevRange);
-  process.exit(1);
-}
-//
-// this mess of args parsing probably belongs in another module.
-//
-let memCheck = false;
-let debug = false;
-const functionNames = [];
-// take from env?
-let args = process.argv.slice(2);
-// this little trick is to deal with vscode's debugger "prompt"
-if (args.length === 1 && args[0].includes(',')) {
-  args = args[0].split(',');
-}
-const functionChain = [];
-for (const arg of args) {
-  if (arg in tests) {
-    // a test can be a sequence of tests. that requires looping
-    // on process.argv and adding tests to functionChain.
-    if (tests[arg].constructor.name === 'AsyncFunction') {
-      functionChain.push(tests[arg]);
-    } else {
-      functionChain.push(async x => tests[arg](x));
-    }
-    functionNames.push(arg);
-  } else if (arg === '-m') {
-    memCheck = true;
-  } else if (arg === '-d') {
-    debug = true;
-  } else if (arg === '-h' || arg === '--help') {
-    console.log('simple-bench function-chain');
-    console.log('all times reported in milliseconds');
-    console.log('  -m do memcheck too (not usually helpful)');
-    console.log('  -d debug (output the function chain constructor names)');
-    console.log('to use a benchmark file other than ./benchmark/definitions.js:');
-    console.log('$ BENCH=./example.js node index.js smallText expand');
-    console.log('to output json instead of text:');
-    console.log('$ JSON=1 node index.js smallText expand');
-    console.log('to output terse text instead of verbose text:');
-    console.log('$ TERSE=1 node index.js smallText expand');
-    console.log('JSON and TERSE accept any non-empty value');
-    process.exit(0);
-  } else {
-    console.log('simple-bench: invalid function-chain function:', arg);
-    // eslint-disable-next-line
-    process.exit(1);
-  }
-}
+const {
+  functionNames,
+} = runSettings;
 
-if (!json) {
+if (!runSettings.json) {
   console.log(`[function chain: ${functionNames.join(', ')}]`);
   console.log(`[${groupIterations} iterations x ${groupCount} groups (${groupWaitMS}ms intergroup pause) stddevRange ${stddevRange}]`);
-  if (debug) {
-    for (const fn of functionChain) {
+  if (runSettings.debug) {
+    for (const fn of runSettings.functionChain) {
       console.log(fn.constructor.name);
     }
   }
@@ -168,21 +179,12 @@ if (!json) {
 }
 
 const hooks = { setup, groupSetup, final };
-const runSettings = {
-  functionChain,
-  functionNames,
-  memCheck,
-  verbose,
-};
-
-
-const options = { json, terse };
 
 const benchmark = makeBenchmark(config, hooks, runSettings);
 
 benchmark()
   .then(benchmarkData => {
-    summarize(benchmarkData, options);
+    summarize(benchmarkData, runSettings);
   });
 
 // let gcTypes;
