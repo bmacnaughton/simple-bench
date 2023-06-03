@@ -94,7 +94,12 @@ module.exports = {
     "quotes": [2, "single", {"avoidEscape": true}],
     // semi: 2
     "space-before-blocks": [2, "always"],
-    "space-before-function-paren": [2, "never"],
+    // error === 2 but is more clear
+    "space-before-function-paren": ["error", {
+      "anonymous": "never",
+      "named": "never",
+      "asyncArrow": "always",
+    }],
     // space-in-parens: [2, "never"]
     "space-infix-ops": ["warn", {"int32Hint": true}],
     "space-unary-ops": 2,
