@@ -42,14 +42,19 @@ level overhead.
 
 ## options
 
-Command line options:
-- -d debug - additional details written to stdout
-- -m capture memory usage stats too (not typically useful)
+Command line (ENV) options:
+- -d, --debug (DEBUG) - additional details written to stdout
+- --json (JSON) - output JSON, not text
+- -m, --memory (MEMORY) - capture memory usage stats too (not typically useful)
+- -t --terse (TERSE) - less output in text mode
+- --verbose (VERBOSE) - output some extra stuff
+- --verify (VERIFY) - set all iteration counts to 1 and wait MS to 10.
 
-Environment variable options:
-- BENCH - use this value for benchmark file (default is benchmark/definitions.js)
-- JSON - set to any non-empty value - output as JSON, not text
-- TERSE - set to any non-empty value - only show clean data (ignored if JSON specified)
+The previous options are all boolean; if the env var exists, the option is set, even if the
+value is empty.
+
+Environment-variable-only option:
+- BENCH - use this value for benchmark file (default is benchmark/definitions.js).
 
 ## JSON output
 
@@ -73,7 +78,7 @@ the mean. this can be set in the benchmark definitions config.)
   - the low cutoff value
   - the high cutoff value
 
-Example:
+Example (formatted; output is not):
 ```json
 {
   "params": {
@@ -220,7 +225,7 @@ $ ./simple-bench.sh definitions
 
 From the output, it can be seen that the `lastIxString` approach is fastest.
 
-## more detail (the code)
+## more detail (and the code)
 
 Execution times reported for each group exclude everything other than executing
 the function-chain. The code:
@@ -251,8 +256,8 @@ async function test() {
       await execute(functionChain);
     }
     perf.measure('iteration-time', 'start-iteration');
-    if (memCheck) {
-      memory[i] = process.memoryUsage();
+    if (memory) {
+      mem[i] = process.memoryUsage();
     }
     await pause(groupWaitMS);
   }
@@ -283,10 +288,9 @@ built-in function as a baseline for comparison.
 
 - update make-csv, pipe-extract, and pipe-make-csv
 - flesh out testing: verify stats, different stddev ranges, ...
-- TERSE
 - release scripts
-- add CI testing
+- add timing for each component of function-chain
 - add time/sample-based observations (ala criterion)
 - add timestamp and definitions file name to JSON output
+- add total elapsed time to output
 - add user tag facility
-- allow config to be set outside of definitions file
