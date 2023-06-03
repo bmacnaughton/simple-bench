@@ -17,7 +17,7 @@ module.exports = {
       warmupIterations: 100,    // function chain executions to startup.
       groupIterations: 100000,  // function chain executions per group
       groupCount: 10,           // groups to execute
-      groupWaitMS: 1000,        // ms to wait between groups
+      groupWaitMS: 250,         // ms to wait between groups
       stddevRange: 2,           // beyond this many stddevs, group times are outliers
     };
   },
@@ -74,7 +74,9 @@ module.exports = {
   },
   // this is called before each group (including the warmup) is executed.
   // if a test requires setup for each group (e.g., initializing or clearing
-  // an array) it can be done here.
+  // an array) it can be done here. N.B. this is more likely to impact the
+  // benchmark results than setup() because it's called multiple times within
+  // the benchmark loop.
   groupSetup(_config) {
 
   },
