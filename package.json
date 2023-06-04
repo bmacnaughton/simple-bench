@@ -10,6 +10,8 @@
   "files": [
     "index.js",
     "README.md",
+    "lib/get-run-settings.js",
+    "lib/make-benchmark.js",
     "lib/summarize.js",
     "benchmark/definitions.js",
     "data/bigfile.log",
