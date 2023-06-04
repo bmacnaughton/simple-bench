@@ -3,7 +3,7 @@
 
 const path = require('path');
 
-const { summarize } = require('./lib/summarize');
+const { makeJson, outputText } = require('./lib/summarize');
 const makeBenchmark = require('./lib/make-benchmark');
 const getRunSettings = require('./lib/get-run-settings');
 
@@ -86,5 +86,10 @@ const benchmark = makeBenchmark(config, hooks, runSettings);
 
 benchmark()
   .then(benchmarkData => {
-    summarize(benchmarkData, runSettings);
+    const json = makeJson(benchmarkData, runSettings);
+    if (runSettings.json) {
+      console.log(JSON.stringify(json));
+    } else {
+      outputText(json, runSettings);
+    }
   });
