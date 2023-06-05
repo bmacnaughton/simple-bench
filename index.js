@@ -3,9 +3,9 @@
 
 const path = require('path');
 
-const { makeJson, outputText } = require('./lib/summarize');
-const makeBenchmark = require('./lib/make-benchmark');
 const getRunSettings = require('./lib/get-run-settings');
+const makeBenchmark = require('./lib/make-benchmark');
+const { makeJson, outputText } = require('./lib/summarize');
 
 /* eslint-disable no-console */
 
