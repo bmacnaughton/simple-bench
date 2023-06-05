@@ -286,11 +286,16 @@ built-in function as a baseline for comparison.
 
 ## todo
 
-- update make-csv, pipe-extract, and pipe-make-csv
+- add timing for each component of function-chain (partial - lacking display)
 - flesh out testing: verify stats, different stddev ranges, ...
+  - augment expected ( {config, runSettings }) for checkJson()
+    so it can handle more cases.
+- consider rust-criterion's sampling mechanisms.
+- consider timer-based warmup
 - release scripts
-- add timing for each component of function-chain
-- add time/sample-based observations (ala criterion)
+- separate execution/timing modes:
+  - add time/sample-based observations (ala criterion) (not clear how to unify data model)
 - add timestamp and definitions file name to JSON output
 - add total elapsed time to output
 - add user tag facility
+- update make-csv, pipe-extract, and pipe-make-csv
