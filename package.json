@@ -25,6 +25,7 @@
   "author": "Bruce A. MacNaughton",
   "license": "MIT",
   "devDependencies": {
+    "@bmacnaughton/string-generator": "^3.0.1",
     "chai": "^4.3.7",
     "eslint": "^8.40.0",
     "mocha": "^10.2.0"

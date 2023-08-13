@@ -2,13 +2,16 @@
 
 const fs = require('fs');
 
-const {Generator} = require('@bmacnaughton/string-generator');
-const g = new Generator();
+const p = import('@bmacnaughton/string-generator');
+p.then(({default: Generator}) => {
+  const g = new Generator();
+  const array = [];
 
-const array = [];
+  for (let i = 0; i < 5; i++) {
+    array.push(g.decode('[A-Za-z_$]') + g.decode('[A-Za-z_$0-9]<1:20>'));
+  }
 
-for (let i = 0; i < 1000000; i++) {
-  array.push(g.gen('${[A-Za-z_$]}${[A-Za-z_$0-9]<1,20>}'));
-}
+  fs.writeFileSync('string-array.json', JSON.stringify(array));
+});
 
-fs.writeFileSync('string-array.json', JSON.stringify(array));
+
