@@ -49,7 +49,8 @@ Command line options:
 Environment variable options:
 - BENCH - use this value for benchmark file (default is benchmark/definitions.js)
 - JSON - set to any non-empty value - output as JSON, not text
-- TERSE - set to any non-empty value - only show clean data (ignored if JSON specified)
+- TERSE - set to any non-empty value - only show clean data (suppress starting
+visual indicator when JSON specified)
 
 ## JSON output
 
@@ -58,8 +59,8 @@ its primary purpose is visual feedback. The second is the benchmark results; it 
 all the information from the summary as well as the following:
 
 - garbage collection stats
-- group stats
-  - the time group's execution
+- raw
+  - the time for each group's execution
   - the mean of the group run times
   - the standard deviation of the group run times
   - and the mean per iteration (mean divided by group iterations)
@@ -292,3 +293,4 @@ built-in function as a baseline for comparison.
 - allow config to be set outside of definitions file
 - make cli/executable version
 - provide some base-level time/cost estimates (show noop/noopu in action)
+- allow multiple specs per decode/tag?

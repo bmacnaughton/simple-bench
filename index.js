@@ -44,6 +44,9 @@ if (!tests.noopUndef) {
 if (!tests.noopu) {
   tests.noopu = async() => undefined;
 }
+if (!tests.debug) {
+  tests.debug = async s => s;
+}
 
 const defaultConfig = {
   warmupIterations: 100,
@@ -127,7 +130,8 @@ if (!json) {
       console.log(fn.constructor.name);
     }
   }
-} else {
+} else if (!terse) {
+  // don't output the visual indicator that it's started when terse
   console.log(JSON.stringify({
     functionChain: functionNames,
     groupIterations,
