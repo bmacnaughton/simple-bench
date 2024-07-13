@@ -50,7 +50,7 @@ for (const f of Object.keys(defaultFunctions)) {
 // call the user's configure function if it's present. probably should just be an object.
 const benchmarkDefaultConfig = configure ? configure() : {};
 
-const { config, runSettings } = getRunSettings(benchmarkDefaultConfig, benchmarkFuncs);
+const { config, runSettings } = getRunSettings(benchmarkDefaultConfig, benchmarkFuncs, defaultFunctions);
 
 const {
   groupCount,

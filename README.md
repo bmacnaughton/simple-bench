@@ -294,3 +294,6 @@ built-in function as a baseline for comparison.
 - add timestamp and definitions file name to JSON output
 - add total elapsed time to output
 - add user tag facility
+- add noop warmup to compare against bench time (warn if overhead is an issue)
+- separate data/execution provider functions (allows automated execution)
+- find way to distinguish between optimized vs. unoptimized bench (e.g. warmups much slower.)
